@@ -1,0 +1,47 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doddle.Linq.Audit", "Doddle.Linq.Audit\Doddle.Linq.Audit.csproj", "{29CB7E4E-6D00-4649-BB2B-DDBB956AC8DF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doddle.Linq.Audit.Tests", "Doddle.Linq.Audit.Tests\Doddle.Linq.Audit.Tests.csproj", "{1F00992C-1B41-40C9-8D4D-D0900F6A9A06}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C11DEACF-9762-4924-A574-4921162E171F}"
+	ProjectSection(SolutionItems) = preProject
+		Doddle.Linq.Audit.vsmdi = Doddle.Linq.Audit.vsmdi
+		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 3
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://tfs09.codeplex.com/
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = Doddle.Linq.Audit\\Doddle.Linq.Audit.csproj
+		SccProjectName1 = Doddle.Linq.Audit
+		SccLocalPath1 = Doddle.Linq.Audit
+		SccProjectUniqueName2 = Doddle.Linq.Audit.Tests\\Doddle.Linq.Audit.Tests.csproj
+		SccProjectName2 = Doddle.Linq.Audit.Tests
+		SccLocalPath2 = Doddle.Linq.Audit.Tests
+	EndGlobalSection
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = Doddle.Linq.Audit.vsmdi
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{29CB7E4E-6D00-4649-BB2B-DDBB956AC8DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29CB7E4E-6D00-4649-BB2B-DDBB956AC8DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29CB7E4E-6D00-4649-BB2B-DDBB956AC8DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29CB7E4E-6D00-4649-BB2B-DDBB956AC8DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F00992C-1B41-40C9-8D4D-D0900F6A9A06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F00992C-1B41-40C9-8D4D-D0900F6A9A06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F00992C-1B41-40C9-8D4D-D0900F6A9A06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F00992C-1B41-40C9-8D4D-D0900F6A9A06}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
