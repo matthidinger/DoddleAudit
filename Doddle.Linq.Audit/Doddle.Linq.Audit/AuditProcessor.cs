@@ -17,13 +17,16 @@ namespace Doddle.Linq.Audit
 
         public void Process()
         {
-            AuditThem(_context.Inserts, AuditAction.Insert);
-            AuditThem(_context.Updates, AuditAction.Update);
-            AuditThem(_context.Deletes, AuditAction.Delete);
+            AuditRows(_context.Inserts, AuditAction.Insert);
+            AuditRows(_context.Updates, AuditAction.Update);
+            AuditRows(_context.Deletes, AuditAction.Delete);
         }
 
-        public void AuditThem(IEnumerable<object> entities, AuditAction action)
+        protected void AuditRows(IEnumerable<object> entities, AuditAction action)
         {
+            if(entities == null)
+                return;
+
             foreach (object entity in entities)
             {
                 Type entityType = entity.GetType();
@@ -33,43 +36,41 @@ namespace Doddle.Linq.Audit
                     {
                         int pk = (int)def.PkSelector.Compile().DynamicInvoke(entity);
 
-                        AuditRecord record = new AuditRecord();
+                        EntityAuditRecord record = new EntityAuditRecord();
                         record.Entity = entity;
                         record.KeySelector = def.PkSelector;
-                        record.ChangeDescription = entityType.Name + " removed";
                         record.Action = action;
-                        record.PrimaryTable = entityType.Name;
-                        record.PrimaryTableKey = pk;
+                        record.EntityTable = entityType.Name;
+                        record.EntityTableKey = pk;
 
-                        record.ModifiedTable = entityType.Name;
-                        record.ModifiedTableKey = pk;
+                        //record.AssociationTable = entityType.Name;
+                        //record.AssociationTableKey = pk;
 
-                        AddValuesToRecord(action, entity, record);
-                        _context.QueueAudit(record);
+                        AddModifiedPropertiesToRecord(action, entity, record);
+                        _context.InsertAuditRecord(record);
 
                         continue;
                     }
 
-                    foreach (IAuditRelationship relationship in def.Relationships)
+                    foreach (IAuditAssociation relationship in def.Relationships)
                     {
-                        if (entityType == relationship.RelationshipEntityType)
+                        if (entityType == relationship.EntityType)
                         {
                             int fk = (int)relationship.FkSelector.Compile().DynamicInvoke(entity);
                             int pk = (int)relationship.PkSelector.Compile().DynamicInvoke(entity);
 
-                            AuditRecord record = new AuditRecord();
+                            EntityAuditRecord record = new EntityAuditRecord();
                             record.Entity = entity;
                             record.KeySelector = relationship.PkSelector;
-                            record.ChangeDescription = entityType.Name + " removed";
                             record.Action = action;
-                            record.PrimaryTable = relationship.PrimaryEntityType.Name;
-                            record.PrimaryTableKey = fk;
+                            record.EntityTable = relationship.ParentEntityType.Name;
+                            record.EntityTableKey = fk;
 
-                            record.ModifiedTable = entityType.Name;
-                            record.ModifiedTableKey = pk;
+                            record.AssociationTable = entityType.Name;
+                            record.AssociationTableKey = pk;
 
-                            AddValuesToRecord(action, entity, record);
-                            _context.QueueAudit(record);
+                            AddModifiedPropertiesToRecord(action, entity, record);
+                            _context.InsertAuditRecord(record);
 
                         }
                     }
@@ -77,10 +78,10 @@ namespace Doddle.Linq.Audit
             }
         }
 
-        private void AddValuesToRecord(AuditAction action, object entity, AuditRecord record)
+        private void AddModifiedPropertiesToRecord(AuditAction action, object entity, EntityAuditRecord record)
         {
             Type entityType = entity.GetType();
-            IAuditValueResolver resolver = AuditValueResolver.GetResolver(entityType);
+            IAuditPropertyResolver resolver = AuditPropertyResolver.GetResolver(entityType);
 
             if (action == AuditAction.Update)
             {
@@ -88,10 +89,10 @@ namespace Doddle.Linq.Audit
 
                 foreach (MemberAudit mi in mmi)
                 {
-                    AuditValue values = resolver.GetAuditValue(mi.Member, mi.OriginalValue, mi.CurrentValue);
+                    ModifiedEntityProperty values = resolver.GetAuditValue(mi.Member, mi.OriginalValue, mi.CurrentValue);
                     if (values != null)
                     {
-                        record.Values.Add(values);
+                        record.ModifiedProperties.Add(values);
                     }
                 }
             }
@@ -100,10 +101,10 @@ namespace Doddle.Linq.Audit
                 PropertyInfo[] props = entity.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy);
                 foreach (PropertyInfo pi in props)
                 {
-                    AuditValue values = resolver.GetAuditValue(pi, null, pi.GetValue(entity, null));
+                    ModifiedEntityProperty values = resolver.GetAuditValue(pi, null, pi.GetValue(entity, null));
                     if (values != null)
                     {
-                        record.Values.Add(values);
+                        record.ModifiedProperties.Add(values);
                     }
                 }
             }
@@ -112,10 +113,10 @@ namespace Doddle.Linq.Audit
                 PropertyInfo[] props = entity.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy);
                 foreach (PropertyInfo pi in props)
                 {
-                    AuditValue values = resolver.GetAuditValue(pi, pi.GetValue(entity, null), null);
+                    ModifiedEntityProperty values = resolver.GetAuditValue(pi, pi.GetValue(entity, null), null);
                     if (values != null)
                     {
-                        record.Values.Add(values);
+                        record.ModifiedProperties.Add(values);
                     }
                 }
             }

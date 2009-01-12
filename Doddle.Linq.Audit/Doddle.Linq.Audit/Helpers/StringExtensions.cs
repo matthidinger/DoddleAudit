@@ -78,9 +78,12 @@ namespace Doddle
             {
                 if (char.IsUpper(letters[i]))
                 {
-                    //Grab everything before the current index.
-                    words.Add(new String(letters, wordStartIndex, i - wordStartIndex));
-                    wordStartIndex = i;
+                    if (i + 1 < letters.Length && !char.IsUpper(letters[i + 1]))
+                    {
+                        //Grab everything before the current index.
+                        words.Add(new String(letters, wordStartIndex, i - wordStartIndex));
+                        wordStartIndex = i;
+                    }
                 }
             }
 

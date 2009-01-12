@@ -8,100 +8,92 @@ namespace Doddle.Linq.Audit
 {
     public static class AuditExtensions
     {
-        public static AuditDefinition<T> Audit<T>(this IAuditableContext context)
+        /// <summary>
+        /// Enlist an Entity for automatic Auditing.
+        /// Use this overload to resolve primary keys automatically.
+        /// </summary>
+        /// <example>db.Audit&lt;Product&gt;();</example>
+        /// <typeparam name="TEntity">Type of Entity you wish to audit</typeparam>
+        public static AuditDefinition<TEntity> Audit<TEntity>(this IAuditableContext context)
         {
-            AuditDefinition<T> def = new AuditDefinition<T>(context);
+            AuditDefinition<TEntity> def = new AuditDefinition<TEntity>(context);
             //def.EntityDisplaySelector = entityNameSelector;
-            def.PkSelector = GetEntityPkSelector<T>(context);
+            def.PkSelector = context.GetEntityPkSelector<TEntity>();
 
             context.AuditDefinitions.Add(def);
 
             return def;
         }
 
-        public static LambdaExpression GetEntityPkSelector<TEntity>(IAuditableContext context)
+        /// <summary>
+        /// Enlist an Entity for automatic Auditing. 
+        /// Use this overload to explicitly declare a primary key selector.
+        /// </summary>
+        /// <example>db.Audit&lt;Product&gt;(p => p.ProductID);</example>
+        /// <typeparam name="TEntity">Type of Entity you wish to audit</typeparam>
+        /// <param name="pkSelector">A lambda expression that accepts a TEntity and returns an int representing the primary key</param>
+        public static AuditDefinition<TEntity> Audit<TEntity>(this IAuditableContext context, Expression<Func<TEntity, int>> pkSelector)
+        {
+            AuditDefinition<TEntity> def = new AuditDefinition<TEntity>(context);
+            def.PkSelector = pkSelector;
+
+            context.AuditDefinitions.Add(def);
+
+            return def;
+        }
+
+        /// <summary>
+        /// Enlist an Entity for automatic Auditing.
+        /// Use this overload to resolve primary keys automatically.
+        /// </summary>
+        /// <example>db.Products.Audit();</example>
+        /// <typeparam name="TEntity">Type of Entity you wish to audit</typeparam>
+        public static AuditDefinition<TEntity> Audit<TEntity>(this Table<TEntity> table) where TEntity : class
+        {
+            IAuditableContext context = (IAuditableContext)table.Context;
+
+            AuditDefinition<TEntity> def = new AuditDefinition<TEntity>(context);
+            def.PkSelector = context.GetEntityPkSelector<TEntity>();
+
+            context.AuditDefinitions.Add(def);
+
+            return def;
+        }
+
+        /// <summary>
+        /// Enlist an Entity for automatic Auditing. 
+        /// Use this overload to explicitly declare a primary key selector.
+        /// </summary>
+        /// <example>db.Products.Audit(p => p.ProductID);</example>
+        /// <typeparam name="TEntity">Type of Entity you wish to audit</typeparam>
+        public static AuditDefinition<TEntity> Audit<TEntity>(this Table<TEntity> table, Expression<Func<TEntity, int>> pkSelector) where TEntity : class
+        {
+            IAuditableContext context = (IAuditableContext)table.Context;
+
+            AuditDefinition<TEntity> def = new AuditDefinition<TEntity>(context);
+            def.PkSelector = pkSelector;
+
+            context.AuditDefinitions.Add(def);
+
+            return def;
+        }
+
+        internal static LambdaExpression GetEntityPkSelector<TEntity>(this IAuditableContext context)
         {
             var pk = context.GetEntityPrimaryKey<TEntity>();
             return GetEntityPropertySelector<TEntity, int>(context, pk.Name);
         }
 
-        public static LambdaExpression GetEntityPropertySelector<TEntity, TReturn>(IAuditableContext context, string propertyName)
+        internal static LambdaExpression GetEntityPropertySelector<TEntity, TProp>(this IAuditableContext context, string propertyName)
         {
             Type entityType = typeof(TEntity);
 
             var param = Expression.Parameter(entityType, "e");
 
-            Expression<Func<TEntity, TReturn>> selector =
-                Expression.Lambda<Func<TEntity, TReturn>>(Expression.Property(param, propertyName), param);
+            Expression<Func<TEntity, TProp>> selector =
+                Expression.Lambda<Func<TEntity, TProp>>(Expression.Property(param, propertyName), param);
 
             return selector;
-        }
-
-        public static AuditDefinition<T> Audit<T>(this Table<T> table) where T : class
-        {
-            IAuditableContext context = (IAuditableContext)table.Context;
-
-            AuditDefinition<T> def = new AuditDefinition<T>(context);
-            def.PkSelector = GetEntityPkSelector<T>(context);
-
-            context.AuditDefinitions.Add(def);
-
-            return def;
-        }
-
-        public static AuditDefinition<T> Audit<T>(this IAuditableContext context, Expression<Func<T, int>> pkSelector, Expression<Func<T, string>> entityNameSelector)
-        {
-            AuditDefinition<T> def = new AuditDefinition<T>(context);
-            def.EntityDisplaySelector = entityNameSelector;
-            def.PkSelector = pkSelector;
-
-            context.AuditDefinitions.Add(def);
-
-            return def;
-        }
-
-        public static AuditDefinition<T> Audit<T>(this Table<T> table, Expression<Func<T, int>> pkSelector, Expression<Func<T, string>> entityNameSelector) where T : class
-        {
-            IAuditableContext context = (IAuditableContext)table.Context;
-
-            AuditDefinition<T> def = new AuditDefinition<T>(context);
-            def.EntityDisplaySelector = entityNameSelector;
-            def.PkSelector = pkSelector;
-
-            context.AuditDefinitions.Add(def);
-
-            return def;
-        }
-
-
-        public static AuditDefinition<T> Relationship<T, TR>(this AuditDefinition<T> definition, Expression<Func<TR, int>> pkSelector, Expression<Func<TR, int>> fkSelector, Expression<Func<TR, string>> entityNameSelector)
-        {
-
-            var relationship = new AuditRelationship<TR>();
-            relationship.EntityDisplaySelector = entityNameSelector;
-            relationship.PrimaryEntityType = typeof(T);
-            relationship.PkSelector = pkSelector;
-            relationship.FkSelector = fkSelector;
-            definition.Relationships.Add(relationship);
-
-            return definition;
-        }
-
-        public static AuditDefinition<T> Relationship<T, TR>(this AuditDefinition<T> definition, Expression<Func<T, IEnumerable<TR>>> relatedEntity) where TR : class
-        {
-            var relationship = new AuditRelationship<TR>();
-
-
-            //relationship.EntityDisplaySelector = entityNameSelector;
-            relationship.PrimaryEntityType = typeof(T);
-            relationship.PkSelector = GetEntityPkSelector<TR>(definition.Context);
-
-            relationship.FkSelector = GetEntityPropertySelector<TR, int?>(definition.Context,
-                                                                    definition.Context.GetEntityRelationshipKeyName<T, TR>());
-            
-            definition.Relationships.Add(relationship);
-
-            return definition;
         }
     }
 }
