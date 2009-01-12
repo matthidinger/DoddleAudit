@@ -6,11 +6,11 @@ using System.Linq.Expressions;
 
 namespace Doddle.Linq.Audit
 {
-    public interface IAuditDefinition
+    public interface IAuditAssociation
     {
-        IAuditableContext Context { get; }
+        Type ParentEntityType { get; }
         Type EntityType { get; }
-        IList<IAuditAssociation> Relationships { get; }
         LambdaExpression PkSelector { get; set; }
+        LambdaExpression FkSelector { get; set; }
     }
 }

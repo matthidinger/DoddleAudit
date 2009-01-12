@@ -9,7 +9,7 @@ namespace Doddle.Linq.Audit
         IEnumerable<object> Inserts { get; }
         IEnumerable<object> Updates { get; }
         IEnumerable<object> Deletes { get; }
-        void QueueAudit(AuditRecord record);
+        void InsertAuditRecord(EntityAuditRecord record);
         IEnumerable<MemberAudit> GetModifiedMembers(object entity);
 
         MemberInfo GetEntityPrimaryKey<TEntity>();

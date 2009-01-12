@@ -28,7 +28,7 @@ namespace Doddle.Linq.Audit.LinqToSql
 
         #endregion
 
-        private readonly List<AuditRecord> _queuedRecords = new List<AuditRecord>();
+        private readonly List<EntityAuditRecord> _queuedRecords = new List<EntityAuditRecord>();
         private readonly List<IAuditDefinition> _auditDefinitions = new List<IAuditDefinition>();
 
 
@@ -36,12 +36,8 @@ namespace Doddle.Linq.Audit.LinqToSql
         /// This method defines how to insert the actual audit record into the database
         /// </summary>
         /// <param name="record"></param>
-        protected abstract void InsertAuditRecord(AuditRecord record);
+        protected abstract void InsertAuditRecordToDatabase(EntityAuditRecord record);
 
-        /// <summary>
-        /// Define all default audits that should be applied to this database
-        /// </summary>
-        //protected abstract void DefaultAuditDefinitions();
 
         public IList<IAuditDefinition> AuditDefinitions
         {
@@ -63,7 +59,7 @@ namespace Doddle.Linq.Audit.LinqToSql
             get { return GetChangeSet().Deletes;  }
         }
 
-        public void QueueAudit(AuditRecord record)
+        public void InsertAuditRecord(EntityAuditRecord record)
         {
             _queuedRecords.Add(record);
         }
@@ -81,8 +77,16 @@ namespace Doddle.Linq.Audit.LinqToSql
         public MemberInfo GetEntityPrimaryKey<TEntity>()
         {
             Type entityType = typeof (TEntity);
-            var pk = Mapping.GetTable(typeof (TEntity)).RowType.DataMembers.SingleOrDefault(md => md.IsPrimaryKey);
-            return pk.Member;
+
+            try
+            {
+                var pk = Mapping.GetTable(typeof(TEntity)).RowType.DataMembers.Single(md => md.IsPrimaryKey);
+                return pk.Member;
+            }
+            catch (Exception)
+            {
+                throw new Exception(string.Format("Auditing logic is only capable of processing tables with a single primary key. Please modify this table structure or remove the table '{0}' from automatic auditing.", Mapping.GetTable(entityType).TableName));
+           }
         }
 
         public string GetEntityRelationshipKeyName<T, TR>()
@@ -94,10 +98,14 @@ namespace Doddle.Linq.Audit.LinqToSql
         }
 
 
+        /// <summary>
+        /// Define all default audits that should be applied to this database
+        /// </summary>
         protected virtual void DefaultAuditDefinitions()
         {
             
         }
+
         public override void SubmitChanges(ConflictMode failureMode)
         {
             DefaultAuditDefinitions();
@@ -108,29 +116,22 @@ namespace Doddle.Linq.Audit.LinqToSql
 
             base.SubmitChanges(failureMode);
 
-            foreach (AuditRecord record in _queuedRecords)
+            foreach (EntityAuditRecord record in _queuedRecords)
             {
                 // New entities (inserts) will have a PK of 0 until LINQ submits changes to the DB and retrieves the real PK,
                 // so we need to update the Insert Audit record with the real PK
                 if (record.Action == AuditAction.Insert)
                 {
                     int pk = (int)record.KeySelector.Compile().DynamicInvoke(record.Entity);
-
-                    if (record.ModifiedTableKey == 0)
-                        record.ModifiedTableKey = pk;
-
-                    if (record.PrimaryTableKey == 0)
-                        record.PrimaryTableKey = pk;
+                    if (record.EntityTableKey == 0)
+                        record.EntityTableKey = pk;
                 }
 
-                InsertAuditRecord(record);
+                InsertAuditRecordToDatabase(record);
             }
 
             // Submit all audits to the db, continue processing even if Auditing records fail
             base.SubmitChanges(ConflictMode.ContinueOnConflict);
         }
-
-        
-
     }
 }
