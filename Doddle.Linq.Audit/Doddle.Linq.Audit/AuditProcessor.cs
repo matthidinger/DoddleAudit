@@ -32,7 +32,7 @@ namespace Doddle.Linq.Audit
                 Type entityType = entity.GetType();
                 foreach (IAuditDefinition def in _context.AuditDefinitions)
                 {
-                    if (entityType == def.EntityType)
+                    if (ShouldAuditEntity(entityType, def.EntityType))
                     {
                         int pk = (int)def.PkSelector.Compile().DynamicInvoke(entity);
 
@@ -54,7 +54,7 @@ namespace Doddle.Linq.Audit
 
                     foreach (IAuditAssociation relationship in def.Relationships)
                     {
-                        if (entityType == relationship.EntityType)
+                        if (ShouldAuditEntity(entityType, relationship.EntityType))
                         {
                             int fk = (int)relationship.FkSelector.Compile().DynamicInvoke(entity);
                             int pk = (int)relationship.PkSelector.Compile().DynamicInvoke(entity);
@@ -76,6 +76,11 @@ namespace Doddle.Linq.Audit
                     }
                 }
             }
+        }
+
+        private static bool ShouldAuditEntity(Type entityType, Type auditType)
+        {
+            return entityType == auditType || entityType.BaseType == auditType;
         }
 
         private void AddModifiedPropertiesToRecord(AuditAction action, object entity, EntityAuditRecord record)
