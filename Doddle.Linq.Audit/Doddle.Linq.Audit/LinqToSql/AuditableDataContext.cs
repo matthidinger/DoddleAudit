@@ -66,7 +66,17 @@ namespace Doddle.Linq.Audit.LinqToSql
 
         public IEnumerable<MemberAudit> GetModifiedMembers(object entity)
         {
-            ITable table = GetTable(entity.GetType());
+            ITable table;
+
+            try
+            {
+                table = GetTable(entity.GetType());
+            }
+            catch
+            {
+                table = GetTable(entity.GetType().BaseType);
+            }
+
             return
                 table.GetModifiedMembers(entity).Select(
                     mmi =>
