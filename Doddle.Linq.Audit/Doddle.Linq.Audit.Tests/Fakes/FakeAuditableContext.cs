@@ -45,7 +45,7 @@ namespace Doddle.Linq.Audit.Tests.Fakes
             get { yield break; }
         }
 
-        public virtual void InsertAuditRecord(EntityAuditRecord record)
+        public virtual void InsertAuditRecord(AuditedEntity record)
         {
 
         }
@@ -55,7 +55,7 @@ namespace Doddle.Linq.Audit.Tests.Fakes
             throw new System.NotImplementedException();
         }
 
-        public virtual MemberInfo GetEntityPrimaryKey<TEntity>()
+        public virtual PropertyInfo GetEntityPrimaryKey<TEntity>()
         {
             //return typeof(TEntity).GetProperty("ID");
             return null;

@@ -58,7 +58,7 @@
     <Compile Include="AuditExtensions.cs" />
     <Compile Include="AuditProcessor.cs" />
     <Compile Include="AuditResolverAttribute.cs" />
-    <Compile Include="EntityAuditRecord.cs" />
+    <Compile Include="AuditedEntity.cs" />
     <Compile Include="AuditAssociation.cs" />
     <Compile Include="ModifiedEntityProperty.cs" />
     <Compile Include="AuditPropertyResolver.cs" />
