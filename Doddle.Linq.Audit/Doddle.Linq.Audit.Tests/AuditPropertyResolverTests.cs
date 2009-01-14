@@ -31,7 +31,7 @@ namespace Doddle.Linq.Audit.Tests
         {
             IAuditableContext context = GetContext();
 
-            context.Expect(c => c.InsertAuditRecord(Arg<EntityAuditRecord>.Matches(e => e.ModifiedProperties.Any(p => p.NewValue == "Beverages"))));
+            context.Expect(c => c.InsertAuditRecord(Arg<AuditedEntity>.Matches(e => e.ModifiedProperties.Any(p => p.NewValue == "Beverages"))));
 
             AuditProcessor processor = new AuditProcessor(context);
             processor.Process();
@@ -44,7 +44,7 @@ namespace Doddle.Linq.Audit.Tests
         {
             IAuditableContext context = GetContext();
 
-            context.Expect(c => c.InsertAuditRecord(Arg<EntityAuditRecord>.Matches(e => e.ModifiedProperties.Any(p => p.MemberName == "Category"))));
+            context.Expect(c => c.InsertAuditRecord(Arg<AuditedEntity>.Matches(e => e.ModifiedProperties.Any(p => p.MemberName == "Category"))));
 
             AuditProcessor processor = new AuditProcessor(context);
             processor.Process();

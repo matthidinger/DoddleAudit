@@ -34,14 +34,14 @@ namespace Doddle.Linq.Audit
                 {
                     if (ShouldAuditEntity(entityType, def.EntityType))
                     {
-                        int pk = (int)def.PkSelector.Compile().DynamicInvoke(entity);
+                        object pk = def.PkSelector.Compile().DynamicInvoke(entity);
 
-                        EntityAuditRecord record = new EntityAuditRecord();
+                        AuditedEntity record = new AuditedEntity();
                         record.Entity = entity;
-                        record.KeySelector = def.PkSelector;
+                        record.PrimaryKeySelector = def.PkSelector;
                         record.Action = action;
                         record.EntityTable = entityType.Name;
-                        record.EntityTableKey = pk;
+                        record.EntityTableKey = new EntityKey(pk);
 
                         //record.AssociationTable = entityType.Name;
                         //record.AssociationTableKey = pk;
@@ -56,18 +56,18 @@ namespace Doddle.Linq.Audit
                     {
                         if (ShouldAuditEntity(entityType, relationship.EntityType))
                         {
-                            int fk = (int)relationship.FkSelector.Compile().DynamicInvoke(entity);
-                            int pk = (int)relationship.PkSelector.Compile().DynamicInvoke(entity);
+                            object fk = relationship.FkSelector.Compile().DynamicInvoke(entity);
+                            object pk = relationship.PkSelector.Compile().DynamicInvoke(entity);
 
-                            EntityAuditRecord record = new EntityAuditRecord();
+                            AuditedEntity record = new AuditedEntity();
                             record.Entity = entity;
-                            record.KeySelector = relationship.PkSelector;
+                            record.PrimaryKeySelector = relationship.PkSelector;
                             record.Action = action;
                             record.EntityTable = relationship.ParentEntityType.Name;
-                            record.EntityTableKey = fk;
+                            record.EntityTableKey = new EntityKey(fk);
 
                             record.AssociationTable = entityType.Name;
-                            record.AssociationTableKey = pk;
+                            record.AssociationTableKey = new EntityKey(pk);
 
                             AddModifiedPropertiesToRecord(action, entity, record);
                             _context.InsertAuditRecord(record);
@@ -83,7 +83,7 @@ namespace Doddle.Linq.Audit
             return entityType == auditType || entityType.BaseType == auditType;
         }
 
-        private void AddModifiedPropertiesToRecord(AuditAction action, object entity, EntityAuditRecord record)
+        private void AddModifiedPropertiesToRecord(AuditAction action, object entity, AuditedEntity record)
         {
             Type entityType = entity.GetType();
             IAuditPropertyResolver resolver = AuditPropertyResolver.GetResolver(entityType);

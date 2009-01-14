@@ -28,7 +28,7 @@ namespace Doddle.Linq.Audit.LinqToSql
 
         #endregion
 
-        private readonly List<EntityAuditRecord> _queuedRecords = new List<EntityAuditRecord>();
+        private readonly List<AuditedEntity> _queuedRecords = new List<AuditedEntity>();
         private readonly List<IAuditDefinition> _auditDefinitions = new List<IAuditDefinition>();
 
 
@@ -36,7 +36,7 @@ namespace Doddle.Linq.Audit.LinqToSql
         /// This method defines how to insert the actual audit record into the database
         /// </summary>
         /// <param name="record"></param>
-        protected abstract void InsertAuditRecordToDatabase(EntityAuditRecord record);
+        protected abstract void InsertAuditRecordToDatabase(AuditedEntity record);
 
 
         public IList<IAuditDefinition> AuditDefinitions
@@ -56,10 +56,10 @@ namespace Doddle.Linq.Audit.LinqToSql
 
         public IEnumerable<object> Deletes
         {
-            get { return GetChangeSet().Deletes;  }
+            get { return GetChangeSet().Deletes; }
         }
 
-        public void InsertAuditRecord(EntityAuditRecord record)
+        public void InsertAuditRecord(AuditedEntity record)
         {
             _queuedRecords.Add(record);
         }
@@ -80,23 +80,28 @@ namespace Doddle.Linq.Audit.LinqToSql
             return
                 table.GetModifiedMembers(entity).Select(
                     mmi =>
-                    new MemberAudit
-                        {Member = mmi.Member, CurrentValue = mmi.CurrentValue, OriginalValue = mmi.OriginalValue});
+                    new MemberAudit { Member = mmi.Member, CurrentValue = mmi.CurrentValue, OriginalValue = mmi.OriginalValue });
         }
 
-        public MemberInfo GetEntityPrimaryKey<TEntity>()
+        public PropertyInfo GetEntityPrimaryKey(Type entityType)
         {
-            Type entityType = typeof (TEntity);
-
             try
             {
-                var pk = Mapping.GetTable(typeof(TEntity)).RowType.DataMembers.Single(md => md.IsPrimaryKey);
-                return pk.Member;
+                var pk = Mapping.GetTable(entityType).RowType.DataMembers.Single(md => md.IsPrimaryKey);
+                return (PropertyInfo)pk.Member;
             }
             catch (Exception)
             {
-                throw new Exception(string.Format("Auditing logic is only capable of processing tables with a single primary key. Please modify this table structure or remove the table '{0}' from automatic auditing.", Mapping.GetTable(entityType).TableName));
-           }
+                throw new InvalidOperationException(
+                    string.Format(
+                        "Auditing logic is only capable of processing tables with a single primary key. Please modify this table structure or remove the table '{0}' from automatic auditing.",
+                        Mapping.GetTable(entityType).TableName));
+            }
+        }
+
+        public PropertyInfo GetEntityPrimaryKey<TEntity>()
+        {
+            return GetEntityPrimaryKey(typeof(TEntity));
         }
 
         public string GetEntityRelationshipKeyName<T, TR>()
@@ -113,28 +118,27 @@ namespace Doddle.Linq.Audit.LinqToSql
         /// </summary>
         protected virtual void DefaultAuditDefinitions()
         {
-            
+
         }
 
         public override void SubmitChanges(ConflictMode failureMode)
         {
             DefaultAuditDefinitions();
-            
+
 
             AuditProcessor processor = new AuditProcessor(this);
             processor.Process();
 
             base.SubmitChanges(failureMode);
 
-            foreach (EntityAuditRecord record in _queuedRecords)
+            foreach (AuditedEntity record in _queuedRecords)
             {
                 // New entities (inserts) will have a PK of 0 until LINQ submits changes to the DB and retrieves the real PK,
                 // so we need to update the Insert Audit record with the real PK
                 if (record.Action == AuditAction.Insert)
                 {
-                    int pk = (int)record.KeySelector.Compile().DynamicInvoke(record.Entity);
-                    if (record.EntityTableKey == 0)
-                        record.EntityTableKey = pk;
+                    object pk = record.PrimaryKeySelector.Compile().DynamicInvoke(record.Entity);
+                    record.EntityTableKey = new EntityKey(pk);
                 }
 
                 InsertAuditRecordToDatabase(record);
