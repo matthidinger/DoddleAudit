@@ -90,14 +90,14 @@ namespace Doddle.Linq.Audit
 
             if (action == AuditAction.Update)
             {
-                var mmi = _context.GetModifiedMembers(entity);
+                var mmi = _context.GetModifiedFields(entity);
 
                 foreach (MemberAudit mi in mmi)
                 {
-                    ModifiedEntityProperty values = resolver.GetAuditValue(mi.Member, mi.OriginalValue, mi.CurrentValue);
+                    AuditedEntityField values = resolver.GetAuditValue(mi.Member, mi.OriginalValue, mi.CurrentValue);
                     if (values != null)
                     {
-                        record.ModifiedProperties.Add(values);
+                        record.ModifiedFields.Add(values);
                     }
                 }
             }
@@ -106,10 +106,10 @@ namespace Doddle.Linq.Audit
                 PropertyInfo[] props = entity.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy);
                 foreach (PropertyInfo pi in props)
                 {
-                    ModifiedEntityProperty values = resolver.GetAuditValue(pi, null, pi.GetValue(entity, null));
+                    AuditedEntityField values = resolver.GetAuditValue(pi, null, pi.GetValue(entity, null));
                     if (values != null)
                     {
-                        record.ModifiedProperties.Add(values);
+                        record.ModifiedFields.Add(values);
                     }
                 }
             }
@@ -118,10 +118,10 @@ namespace Doddle.Linq.Audit
                 PropertyInfo[] props = entity.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy);
                 foreach (PropertyInfo pi in props)
                 {
-                    ModifiedEntityProperty values = resolver.GetAuditValue(pi, pi.GetValue(entity, null), null);
+                    AuditedEntityField values = resolver.GetAuditValue(pi, pi.GetValue(entity, null), null);
                     if (values != null)
                     {
-                        record.ModifiedProperties.Add(values);
+                        record.ModifiedFields.Add(values);
                     }
                 }
             }

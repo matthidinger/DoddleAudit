@@ -64,7 +64,7 @@ namespace Doddle.Linq.Audit.LinqToSql
             _queuedRecords.Add(record);
         }
 
-        public IEnumerable<MemberAudit> GetModifiedMembers(object entity)
+        public IEnumerable<MemberAudit> GetModifiedFields(object entity)
         {
             ITable table;
 
@@ -80,7 +80,7 @@ namespace Doddle.Linq.Audit.LinqToSql
             return
                 table.GetModifiedMembers(entity).Select(
                     mmi =>
-                    new MemberAudit { Member = mmi.Member, CurrentValue = mmi.CurrentValue, OriginalValue = mmi.OriginalValue });
+                    new MemberAudit(mmi.Member, mmi.CurrentValue, mmi.OriginalValue));
         }
 
         public PropertyInfo GetEntityPrimaryKey(Type entityType)

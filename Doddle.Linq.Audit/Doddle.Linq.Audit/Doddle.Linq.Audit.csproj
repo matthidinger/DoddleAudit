@@ -60,7 +60,8 @@
     <Compile Include="AuditResolverAttribute.cs" />
     <Compile Include="AuditedEntity.cs" />
     <Compile Include="AuditAssociation.cs" />
-    <Compile Include="ModifiedEntityProperty.cs" />
+    <Compile Include="EntityKey.cs" />
+    <Compile Include="AuditedEntityField.cs" />
     <Compile Include="AuditPropertyResolver.cs" />
     <Compile Include="CustomizedAuditProperty.cs" />
     <Compile Include="Entity\AuditableObjectContext.cs" />
@@ -71,6 +72,7 @@
     <Compile Include="IAuditAssociation.cs" />
     <Compile Include="IAuditPropertyResolver.cs" />
     <Compile Include="LinqToSql\AuditableDataContext.cs" />
+    <Compile Include="MemberAudit.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
