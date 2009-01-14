@@ -50,7 +50,7 @@ namespace Doddle.Linq.Audit.Tests.Fakes
 
         }
 
-        public virtual IEnumerable<MemberAudit> GetModifiedMembers(object entity)
+        public virtual IEnumerable<MemberAudit> GetModifiedFields(object entity)
         {
             throw new System.NotImplementedException();
         }

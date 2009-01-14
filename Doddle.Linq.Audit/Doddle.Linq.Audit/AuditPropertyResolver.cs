@@ -27,12 +27,12 @@ namespace Doddle.Linq.Audit
             return member.HasAttribute(typeof(ColumnAttribute)) && !member.Name.EndsWith("Id");
         }
 
-        public ModifiedEntityProperty GetAuditValue(MemberInfo member, object oldValue, object newValue)
+        public AuditedEntityField GetAuditValue(MemberInfo member, object oldValue, object newValue)
         {
             if (IsMemberValid(member))
             {
-                ModifiedEntityProperty value = new ModifiedEntityProperty();
-                value.MemberName = member.Name.SplitUpperCaseToString();
+                AuditedEntityField value = new AuditedEntityField();
+                value.FieldName = member.Name.SplitUpperCaseToString();
                 value.OldValue = GetPropertyValue(oldValue);
                 value.NewValue = GetPropertyValue(newValue);
                 return value;
@@ -88,17 +88,17 @@ namespace Doddle.Linq.Audit
             _customizedProperties.Add(exp.Member, prop);
         }
 
-        public ModifiedEntityProperty GetAuditValue(MemberInfo member, object oldValue, object newValue)
+        public AuditedEntityField GetAuditValue(MemberInfo member, object oldValue, object newValue)
         {
-            ModifiedEntityProperty value;
+            AuditedEntityField value;
 
             if (_customizedProperties.ContainsKey(member))
             {
                 CustomizedAuditProperty property = _customizedProperties[member];
                 Delegate func = property.ValueSelector.Compile();
 
-                value = new ModifiedEntityProperty();
-                value.MemberName = property.PropertyName;
+                value = new AuditedEntityField();
+                value.FieldName = property.PropertyName;
 
                 if (oldValue != null)
                     value.OldValue = func.DynamicInvoke(oldValue).ToString();

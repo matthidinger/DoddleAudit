@@ -8,6 +8,6 @@ namespace Doddle.Linq.Audit
 {
     public interface IAuditPropertyResolver
     {
-        ModifiedEntityProperty GetAuditValue(MemberInfo member, object oldValue, object newValue);
+        AuditedEntityField GetAuditValue(MemberInfo member, object oldValue, object newValue);
     }
 }
