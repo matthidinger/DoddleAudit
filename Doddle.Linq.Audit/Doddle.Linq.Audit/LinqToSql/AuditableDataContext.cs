@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,6 +31,7 @@ namespace Doddle.Linq.Audit.LinqToSql
 
         private readonly List<AuditedEntity> _queuedRecords = new List<AuditedEntity>();
         private readonly List<IAuditDefinition> _auditDefinitions = new List<IAuditDefinition>();
+        private readonly List<Func<MemberInfo, object, bool>> _propertyAuditRules = new List<Func<MemberInfo, object, bool>>();
 
 
         /// <summary>
@@ -44,17 +46,17 @@ namespace Doddle.Linq.Audit.LinqToSql
             get { return _auditDefinitions; }
         }
 
-        public IEnumerable<object> Inserts
+        public IEnumerable Inserts
         {
             get { return GetChangeSet().Inserts; }
         }
 
-        public IEnumerable<object> Updates
+        public IEnumerable Updates
         {
             get { return GetChangeSet().Updates; }
         }
 
-        public IEnumerable<object> Deletes
+        public IEnumerable Deletes
         {
             get { return GetChangeSet().Deletes; }
         }
@@ -90,7 +92,7 @@ namespace Doddle.Linq.Audit.LinqToSql
                 var pk = Mapping.GetTable(entityType).RowType.DataMembers.Single(md => md.IsPrimaryKey);
                 return (PropertyInfo)pk.Member;
             }
-            catch (Exception)
+            catch
             {
                 throw new InvalidOperationException(
                     string.Format(
@@ -112,6 +114,11 @@ namespace Doddle.Linq.Audit.LinqToSql
             return Mapping.GetTable(entityType).RowType.Associations.First(ma => ma.OtherType.Type == relType).OtherKey.First().Name;
         }
 
+        public IList<Func<MemberInfo, object, bool>> PropertyAuditRules
+        {
+            get { return _propertyAuditRules; }
+        }
+
 
         /// <summary>
         /// Define all default audits that should be applied to this database
@@ -123,9 +130,9 @@ namespace Doddle.Linq.Audit.LinqToSql
 
         public override void SubmitChanges(ConflictMode failureMode)
         {
+            PropertyAuditRules.Add((m, e) => m.HasAttribute(typeof(ColumnAttribute)));
             DefaultAuditDefinitions();
-
-
+            
             AuditProcessor processor = new AuditProcessor(this);
             processor.Process();
 
@@ -133,14 +140,7 @@ namespace Doddle.Linq.Audit.LinqToSql
 
             foreach (AuditedEntity record in _queuedRecords)
             {
-                // New entities (inserts) will have a PK of 0 until LINQ submits changes to the DB and retrieves the real PK,
-                // so we need to update the Insert Audit record with the real PK
-                if (record.Action == AuditAction.Insert)
-                {
-                    object pk = record.PrimaryKeySelector.Compile().DynamicInvoke(record.Entity);
-                    record.EntityTableKey = new EntityKey(pk);
-                }
-
+                record.UpdateKeys();
                 InsertAuditRecordToDatabase(record);
             }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Linq;
 using System.Linq.Expressions;
 using System.Linq;
+using System.Reflection;
 
 namespace Doddle.Linq.Audit
 {
@@ -17,8 +18,7 @@ namespace Doddle.Linq.Audit
         public static AuditDefinition<TEntity> Audit<TEntity>(this IAuditableContext context)
         {
             AuditDefinition<TEntity> def = new AuditDefinition<TEntity>(context);
-            //def.EntityDisplaySelector = entityNameSelector;
-            def.PkSelector = context.GetEntityPkSelector<TEntity>();
+            def.PkSelector = GetEntityPkProperty<TEntity>(context);
 
             context.AuditDefinitions.Add(def);
 
@@ -31,8 +31,8 @@ namespace Doddle.Linq.Audit
         /// </summary>
         /// <example>db.Audit&lt;Product&gt;(p => p.ProductID);</example>
         /// <typeparam name="TEntity">Type of Entity you wish to audit</typeparam>
-        /// <param name="pkSelector">A lambda expression that accepts a TEntity and returns an int representing the primary key</param>
-        public static AuditDefinition<TEntity> Audit<TEntity>(this IAuditableContext context, Expression<Func<TEntity, int>> pkSelector)
+        /// <param name="pkSelector">A lambda expression that accepts a TEntity and returns an object representing the primary key</param>
+        public static AuditDefinition<TEntity> Audit<TEntity>(this IAuditableContext context, Expression<Func<TEntity, object>> pkSelector)
         {
             AuditDefinition<TEntity> def = new AuditDefinition<TEntity>(context);
             def.PkSelector = pkSelector;
@@ -53,7 +53,7 @@ namespace Doddle.Linq.Audit
             IAuditableContext context = (IAuditableContext)table.Context;
 
             AuditDefinition<TEntity> def = new AuditDefinition<TEntity>(context);
-            def.PkSelector = context.GetEntityPkSelector<TEntity>();
+            def.PkSelector = GetEntityPkProperty<TEntity>(context);
 
             context.AuditDefinitions.Add(def);
 
@@ -66,7 +66,7 @@ namespace Doddle.Linq.Audit
         /// </summary>
         /// <example>db.Products.Audit(p => p.ProductID);</example>
         /// <typeparam name="TEntity">Type of Entity you wish to audit</typeparam>
-        public static AuditDefinition<TEntity> Audit<TEntity>(this Table<TEntity> table, Expression<Func<TEntity, int>> pkSelector) where TEntity : class
+        public static AuditDefinition<TEntity> Audit<TEntity>(this Table<TEntity> table, Expression<Func<TEntity, object>> pkSelector) where TEntity : class
         {
             IAuditableContext context = (IAuditableContext)table.Context;
 
@@ -78,22 +78,41 @@ namespace Doddle.Linq.Audit
             return def;
         }
 
-        internal static LambdaExpression GetEntityPkSelector<TEntity>(this IAuditableContext context)
+        internal static LambdaExpression GetEntityPkProperty<TEntity>(this IAuditableContext context)
         {
             var pk = context.GetEntityPrimaryKey<TEntity>();
-            return GetEntityPropertySelector<TEntity, int>(context, pk.Name);
+            return GetPropertySelector<TEntity>(context, pk.Name);
         }
 
-        internal static LambdaExpression GetEntityPropertySelector<TEntity, TProp>(this IAuditableContext context, string propertyName)
+        internal static LambdaExpression GetPropertySelector<TEntity>(this IAuditableContext context, string propertyName)
         {
             Type entityType = typeof(TEntity);
-
             var param = Expression.Parameter(entityType, "e");
 
-            Expression<Func<TEntity, TProp>> selector =
-                Expression.Lambda<Func<TEntity, TProp>>(Expression.Property(param, propertyName), param);
+
+            Expression<Func<TEntity, object>> selector =
+                Expression.Lambda<Func<TEntity, object>>(Expression.Convert(Expression.Property(param, propertyName), typeof(object)), param);
 
             return selector;
+        }
+
+        internal static bool ShouldAuditProperty(this IAuditableContext context, MemberInfo member, object entity)
+        {
+            bool auditProperty = true;
+            foreach (var rule in context.PropertyAuditRules)
+            {
+                if (rule(member, entity) == false)
+                {
+                    auditProperty = false;
+                }
+            }
+
+            return auditProperty;
+        }
+
+        public static void ExcludePropertyIf(this IAuditableContext context, Func<MemberInfo, object, bool> condition)
+        {
+            context.PropertyAuditRules.Add(condition);
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Doddle.Linq.Audit
 {
@@ -10,6 +11,7 @@ namespace Doddle.Linq.Audit
     {
         Type ParentEntityType { get; }
         Type EntityType { get; }
+
         LambdaExpression PkSelector { get; set; }
         LambdaExpression FkSelector { get; set; }
     }

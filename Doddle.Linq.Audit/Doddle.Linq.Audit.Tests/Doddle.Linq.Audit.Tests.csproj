@@ -45,14 +45,28 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.Entity">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Runtime.Serialization">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Security" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuditProcessorTests.cs" />
     <Compile Include="AuditPropertyResolverTests.cs" />
+    <Compile Include="EntityFrameworkTests\EntityAuditTests.cs" />
+    <Compile Include="EntityFrameworkTests\NorthwindEntities.cs" />
+    <Compile Include="EntityFrameworkTests\NorthwindModel.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>NorthwindModel.edmx</DependentUpon>
+    </Compile>
     <Compile Include="Fakes\Category.cs" />
     <Compile Include="Fakes\FakeAuditableContext.cs" />
     <Compile Include="Fakes\Product.cs" />
@@ -64,6 +78,15 @@
       <Project>{29CB7E4E-6D00-4649-BB2B-DDBB956AC8DF}</Project>
       <Name>Doddle.Linq.Audit</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EntityDeploy Include="EntityFrameworkTests\NorthwindModel.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>NorthwindModel.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.Config" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

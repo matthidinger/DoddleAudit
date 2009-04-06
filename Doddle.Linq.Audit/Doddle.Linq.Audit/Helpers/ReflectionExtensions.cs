@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Web.UI;
 using System.Reflection;
+using System.Linq.Expressions;
 
-namespace Doddle.Reflection
+namespace Doddle.Linq.Audit
 {
     public static class ReflectionExtensions
     {
@@ -25,6 +26,23 @@ namespace Doddle.Reflection
         public static bool HasAttribute(this MemberInfo mi, Type attrType)
         {
             return mi.GetCustomAttributes(attrType, false) != null;
+        }
+
+        public static PropertyInfo ToPropertyInfo(this LambdaExpression expression)
+        {
+            MemberExpression memberExpression;
+
+            UnaryExpression unaryExpression = expression.Body as UnaryExpression;
+            if(unaryExpression != null)
+            {
+               memberExpression = unaryExpression.Operand as MemberExpression;
+            }
+            else
+            {
+                memberExpression = expression.Body as MemberExpression;
+            }
+
+            return (PropertyInfo)memberExpression.Member;
         }
     }
 }

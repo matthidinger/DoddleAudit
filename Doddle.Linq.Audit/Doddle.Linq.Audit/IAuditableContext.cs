@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Collections;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Doddle.Linq.Audit
@@ -7,14 +10,16 @@ namespace Doddle.Linq.Audit
     {
         IList<IAuditDefinition> AuditDefinitions { get; }
 
-        IEnumerable<object> Inserts { get; }
-        IEnumerable<object> Updates { get; }
-        IEnumerable<object> Deletes { get; }
+        IEnumerable Inserts { get; }
+        IEnumerable Updates { get; }
+        IEnumerable Deletes { get; }
         
         void InsertAuditRecord(AuditedEntity record);
         
         IEnumerable<MemberAudit> GetModifiedFields(object entity);
         PropertyInfo GetEntityPrimaryKey<TEntity>();
         string GetEntityRelationshipKeyName<T, TR>();
+
+        IList<Func<MemberInfo, object, bool>> PropertyAuditRules { get; }
     }
 }

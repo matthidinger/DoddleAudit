@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Doddle.Linq.Audit
 {
@@ -25,7 +26,6 @@ namespace Doddle.Linq.Audit
 
         public LambdaExpression PkSelector { get; set; }
 
-
         private readonly List<IAuditAssociation> _relationships = new List<IAuditAssociation>();
         public IList<IAuditAssociation> Relationships
         {
@@ -34,6 +34,7 @@ namespace Doddle.Linq.Audit
                 return _relationships;
             }
         }
+
 
         /// <summary>
         /// Include an association (relationship) table to audit along with the parent table. 
@@ -44,13 +45,13 @@ namespace Doddle.Linq.Audit
         /// <param name="pkSelector">A lambda expression that returns the primary key property of the Associated table</param>
         /// <param name="fkSelector">A lambda expression that returns the foreign key property, which refers to the primary key of the parent entity</param>
         /// <example>db.Orders.Audit(o => o.OrderID).AuditAssociation&lt;Order_Details&gt;(od => od.Order_DetailID, od => od.OrderID);</example>
-        public AuditDefinition<TEntity> AuditAssociation<TAssociation>(Expression<Func<TAssociation, int>> pkSelector, Expression<Func<TAssociation, int>> fkSelector)
+        public AuditDefinition<TEntity> AuditAssociation<TAssociation>(Expression<Func<TAssociation, object>> pkSelector, Expression<Func<TAssociation, object>> fkSelector)
         {
             var relationship = new AuditAssociation<TAssociation>();
             relationship.ParentEntityType = typeof(TEntity);
             relationship.PkSelector = pkSelector;
             relationship.FkSelector = fkSelector;
-            this.Relationships.Add(relationship);
+            Relationships.Add(relationship);
 
             return this;
         }
@@ -67,11 +68,11 @@ namespace Doddle.Linq.Audit
         {
             var relationship = new AuditAssociation<TAssociation>();
             relationship.ParentEntityType = typeof(TEntity);
-            relationship.PkSelector = this.Context.GetEntityPkSelector<TAssociation>();
+            relationship.PkSelector = Context.GetEntityPkProperty<TAssociation>();
 
-            relationship.FkSelector = this.Context.GetEntityPropertySelector<TAssociation, int?>(this.Context.GetEntityRelationshipKeyName<TEntity, TAssociation>());
+            relationship.FkSelector = Context.GetPropertySelector<TAssociation>(Context.GetEntityRelationshipKeyName<TEntity, TAssociation>());
 
-            this.Relationships.Add(relationship);
+            Relationships.Add(relationship);
 
             return this;
         }

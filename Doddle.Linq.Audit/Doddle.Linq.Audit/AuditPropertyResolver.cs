@@ -5,45 +5,28 @@ using System.Text;
 using System.Reflection;
 using System.Linq.Expressions;
 using System.Data.Linq.Mapping;
-using Doddle.Reflection;
 
 namespace Doddle.Linq.Audit
 {
     public class AuditPropertyResolver : IAuditPropertyResolver
     {
-        private static string GetPropertyValue(PropertyInfo pi, object input)
-        {
-            object tmp = pi.GetValue(input, null);
-            return (tmp == null) ? string.Empty : tmp.ToString();
-        }
-
         private static string GetPropertyValue(object input)
         {
             return (input == null) ? string.Empty : input.ToString();
         }
 
-        public bool IsMemberValid(MemberInfo member)
-        {
-            return member.HasAttribute(typeof(ColumnAttribute)) && !member.Name.EndsWith("Id");
-        }
-
         public AuditedEntityField GetAuditValue(MemberInfo member, object oldValue, object newValue)
         {
-            if (IsMemberValid(member))
-            {
-                AuditedEntityField value = new AuditedEntityField();
-                value.FieldName = member.Name.SplitUpperCaseToString();
-                value.OldValue = GetPropertyValue(oldValue);
-                value.NewValue = GetPropertyValue(newValue);
-                return value;
-            }
-
-            return null;
+            AuditedEntityField value = new AuditedEntityField();
+            value.FieldName = member.Name.SplitUpperCaseToString();
+            value.OldValue = GetPropertyValue(oldValue);
+            value.NewValue = GetPropertyValue(newValue);
+            return value;
         }
+
         public static IAuditPropertyResolver GetResolver<TEntity>()
         {
             return GetResolver(typeof (TEntity));
-
         }
 
         public static IAuditPropertyResolver GetResolver(Type type)

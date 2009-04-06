@@ -1,78 +1,172 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Data.Metadata.Edm;
-//using System.Linq;
-//using System.Linq.Expressions;
-//using System.Text;
-//using System.Data.Objects;
-//using Doddle.Linq.Audit;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.Metadata.Edm;
+using System.Data.Objects.DataClasses;
+using System.Linq;
+using System.Reflection;
+using System.Data.Objects;
+using System.Data.EntityClient;
+using System.Linq.Expressions;
 
-//namespace Doddle.Linq.Audit.Entity
-//{
-//    public class AuditableObjectContext : ObjectStateManager, IAuditableContext
-//    {
-//        public AuditableObjectContext(MetadataWorkspace workspace) : base(workspace)
-//        {
-            
-//        }
-//        public void Audit()
-//        {
-//            ObjectContext t;
+namespace Doddle.Linq.Audit.Entity
+{
+    public abstract class AuditableObjectContext : ObjectContext, IAuditableContext
+    {
+        #region Constructors
 
-//            var added = this.GetObjectStateEntries(System.Data.EntityState.Added);
-//            foreach (ObjectStateEntry entry in added)
-//            {
+        protected AuditableObjectContext(string connectionString)
+            : base(connectionString)
+        { }
 
-//                AuditRecord record = new AuditRecord();
-                
-//                foreach(string propName in entry.GetModifiedProperties())
-//                {
-//                    object propValue = entry.CurrentValues[propName];
+        protected AuditableObjectContext(string connectinString, string defaultContainerName)
+            : base(connectinString, defaultContainerName)
+        { }
+        protected AuditableObjectContext(EntityConnection connection)
+            : base(connection)
+        { }
+        protected AuditableObjectContext(EntityConnection connection, string defaultContainerName)
+            : base(connection, defaultContainerName)
+        { }
 
-//                    AuditValue values = new AuditValue();
-//                    values.MemberName = propName;
-//                    values.OldValue = entry.OriginalValues[propName].ToString();
-//                    values.NewValue = entry.CurrentValues[propName].ToString();
-//                }
-//                //entry.CurrentValues
-//            }
+        #endregion
+
+        /// <summary>
+        /// This method defines how to insert the actual audit record into the database
+        /// </summary>
+        /// <param name="record"></param>
+        protected abstract void InsertAuditRecordToDatabase(AuditedEntity record);
 
 
-//        }
+        private readonly List<IAuditDefinition> _auditDefinitions = new List<IAuditDefinition>();
+        private readonly List<AuditedEntity> _queuedRecords = new List<AuditedEntity>();
+        private readonly List<Func<MemberInfo, object, bool>> _propertyAuditRules = new List<Func<MemberInfo, object, bool>>();
 
-//        public IList<IAuditDefinition> AuditDefinitions
-//        {
-//            get { throw new System.NotImplementedException(); }
-//        }
 
-//        public IEnumerable<object> Inserts
-//        {
-//            get { throw new System.NotImplementedException(); }
-//        }
+        protected virtual void SaveChangesAndAudit()
+        {
+            PropertyAuditRules.Add(ShouldAuditProperty);
 
-//        public IEnumerable<object> Updates
-//        {
-//            get { throw new System.NotImplementedException(); }
-//        }
+            AuditProcessor processor = new AuditProcessor(this);
+            processor.Process();
 
-//        public IEnumerable<object> Deletes
-//        {
-//            get { throw new System.NotImplementedException(); }
-//        }
+            base.SaveChanges();
 
-//        public void QueueAudit(AuditRecord record)
-//        {
-//            throw new System.NotImplementedException();
-//        }
+            foreach (AuditedEntity record in _queuedRecords)
+            {
+                if (record.Action == AuditAction.Insert)
+                {
+                    record.UpdateKeys();
+                }
+                InsertAuditRecordToDatabase(record);
+            }
 
-//        public IEnumerable<MemberAudit> GetModifiedMembers(object entity)
-//        {
-//            throw new System.NotImplementedException();
-//        }
+            base.SaveChanges();
+        }
 
-//        public LambdaExpression EntityPkSelector
-//        {
-//            get { throw new System.NotImplementedException(); }
-//        }
-//    }
-//}
+        public new void SaveChanges()
+        {
+            SaveChangesAndAudit();   
+        }
+
+        private bool ShouldAuditProperty(MemberInfo member, object entity)
+        {
+            var stateEntry = ObjectStateManager.GetObjectStateEntry(entity);
+            return !stateEntry.IsRelationship;
+        }
+
+        public IList<IAuditDefinition> AuditDefinitions
+        {
+            get { return _auditDefinitions; }
+        }
+
+        public IEnumerable Inserts
+        {
+            get { return ObjectStateManager.GetObjectStateEntries(EntityState.Added).Select(o => o.Entity); }
+        }
+
+        public IEnumerable Updates
+        {
+            get { return ObjectStateManager.GetObjectStateEntries(EntityState.Modified).Select(o => o.Entity); }
+        }
+
+        public IEnumerable Deletes
+        {
+            get { return ObjectStateManager.GetObjectStateEntries(EntityState.Deleted).Select(o => o.Entity); }
+        }
+
+        public void InsertAuditRecord(AuditedEntity record)
+        {
+            _queuedRecords.Add(record);
+        }
+
+        public IEnumerable<MemberAudit> GetModifiedFields(object entity)
+        {
+            ObjectStateEntry entry = ObjectStateManager.GetObjectStateEntry(entity);
+            return
+                entry.GetModifiedProperties().Select(
+                    p =>
+                    new MemberAudit(entity.GetType().GetProperty(p), entry.OriginalValues[p], entry.CurrentValues[p]));
+        }
+
+        public PropertyInfo GetEntityPrimaryKey<TEntity>()
+        {
+            Type entityType = typeof(TEntity);
+            return GetEntityPrimaryKey(entityType);
+        }
+
+        private PropertyInfo GetEntityPrimaryKey(Type type)
+        {
+            EntityType entityType = (from meta in MetadataWorkspace.GetItems(DataSpace.CSpace)
+                               where meta.BuiltInTypeKind == BuiltInTypeKind.EntityType
+                               select meta)
+                              .OfType<EntityType>()
+                              .Where(e => e.Name == type.Name).Single();
+
+            return type.GetProperty(entityType.KeyMembers[0].Name);
+        }
+
+        public string GetEntitySetName(string entityTypeName)
+        {
+            var container = MetadataWorkspace.GetEntityContainer(DefaultContainerName, DataSpace.CSpace);
+            string entitySetName = (from meta in container.BaseEntitySets
+                                    where meta.ElementType.Name == entityTypeName
+                                    select meta.Name).FirstOrDefault();
+            return entitySetName;
+        }
+
+        public string GetEntityRelationshipKeyName<T, TR>()
+        {
+            Type entityType = typeof(T);
+            Type relType = typeof(TR);
+
+            EntityType type = (from meta in MetadataWorkspace.GetItems(DataSpace.CSpace)
+                               where meta.BuiltInTypeKind == BuiltInTypeKind.EntityType
+                               select meta)
+                              .OfType<EntityType>()
+                              .Where(e => e.Name == relType.Name).Single();
+
+            //foreach (IRelatedEnd relatedEnd in ((IEntityWithRelationships)entityType).RelationshipManager.GetAllRelatedEnds())
+            //{
+            //    foreach (IEntityWithKey relatedItem in relatedEnd)
+            //    {
+            //        object reference = null;
+            //        entities.TryGetObjectByKey(relatedItem.EntityKey, out reference);
+            //        (original as EntityObject).GetType().GetProperty(relatedEnd.TargetRoleName).SetValue(original, reference, null);
+            //    }
+            //}
+
+
+            //var navigationProperty = type.NavigationProperties.First(n => n.DeclaringType.Name == relType.Name);
+            //return navigationProperty.ToEndMember.Name;
+
+            throw new InvalidOperationException(string.Format("Auditing associations with Entity Framework is currently unable to automatically lookup primary and foreign keys when using this overload of AuditAssocitation(). Please use the 'AuditAssocitation<{0}>(o => o.PrimaryKey, o => o.ForeignKey)' overload to manually provide the primary and foreign keys", relType));
+        }
+
+        public IList<Func<MemberInfo, object, bool>> PropertyAuditRules
+        {
+            get { return _propertyAuditRules; }
+        }
+    }
+}

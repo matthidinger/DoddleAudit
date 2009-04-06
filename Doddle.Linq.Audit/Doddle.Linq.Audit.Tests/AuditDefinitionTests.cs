@@ -42,6 +42,7 @@ namespace Doddle.Linq.Audit.Tests
             Assert.AreEqual(1, context.AuditDefinitions[0].Relationships.Count);
         }
 
+
         private IAuditableContext GetContext()
         {
             return new FakeAuditableContext();
