@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections;
 using System.Reflection;
 using System.Text;
 using System.Data.Linq;
@@ -21,7 +22,7 @@ namespace Doddle.Linq.Audit.Tests.Fakes
             get { return _auditDefinitions; }
         }
 
-        public IEnumerable<object> Inserts
+        public IEnumerable Inserts
         {
             get
             {
@@ -35,12 +36,12 @@ namespace Doddle.Linq.Audit.Tests.Fakes
             }
         }
 
-        public IEnumerable<object> Updates
+        public IEnumerable Updates
         {
             get { yield break; }
         }
 
-        public IEnumerable<object> Deletes
+        public IEnumerable Deletes
         {
             get { yield break; }
         }
@@ -64,6 +65,12 @@ namespace Doddle.Linq.Audit.Tests.Fakes
         public virtual string GetEntityRelationshipKeyName<T, TR>()
         {
             return "";
+        }
+
+        private List<Func<MemberInfo, object, bool>> _propertyAuditRules = new List<Func<MemberInfo, object, bool>>();
+        public IList<Func<MemberInfo, object, bool>> PropertyAuditRules
+        {
+            get { return _propertyAuditRules; }
         }
     }
 
