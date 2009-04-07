@@ -59,7 +59,7 @@
     <Compile Include="AuditAction.cs" />
     <Compile Include="AuditDefinition.cs" />
     <Compile Include="AuditExtensions.cs" />
-    <Compile Include="AuditProcessor.cs" />
+    <Compile Include="ContextAuditor.cs" />
     <Compile Include="AuditResolverAttribute.cs" />
     <Compile Include="AuditedEntity.cs" />
     <Compile Include="AuditAssociation.cs" />

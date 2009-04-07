@@ -3,12 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Metadata.Edm;
-using System.Data.Objects.DataClasses;
 using System.Linq;
 using System.Reflection;
 using System.Data.Objects;
 using System.Data.EntityClient;
-using System.Linq.Expressions;
 
 namespace Doddle.Linq.Audit.Entity
 {
@@ -48,8 +46,8 @@ namespace Doddle.Linq.Audit.Entity
         {
             PropertyAuditRules.Add(ShouldAuditProperty);
 
-            AuditProcessor processor = new AuditProcessor(this);
-            processor.Process();
+            ContextAuditor auditor = new ContextAuditor(this);
+            auditor.AuditPendingDataModifications();
 
             base.SaveChanges();
 
