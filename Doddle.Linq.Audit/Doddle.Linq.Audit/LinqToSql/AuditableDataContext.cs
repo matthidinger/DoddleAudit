@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -133,14 +133,17 @@ namespace Doddle.Linq.Audit.LinqToSql
             PropertyAuditRules.Add((m, e) => m.HasAttribute(typeof(ColumnAttribute)));
             DefaultAuditDefinitions();
             
-            AuditProcessor processor = new AuditProcessor(this);
-            processor.Process();
+            ContextAuditor auditor = new ContextAuditor(this);
+            auditor.AuditPendingDataModifications();
 
             base.SubmitChanges(failureMode);
 
             foreach (AuditedEntity record in _queuedRecords)
             {
-                record.UpdateKeys();
+                if (record.Action == AuditAction.Insert)
+                {
+                    record.UpdateKeys();
+                }
                 InsertAuditRecordToDatabase(record);
             }
 

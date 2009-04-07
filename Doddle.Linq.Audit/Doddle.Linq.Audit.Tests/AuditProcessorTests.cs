@@ -17,8 +17,8 @@ namespace Doddle.Linq.Audit.Tests
         {
             IAuditableContext context = GetContext();
 
-            AuditProcessor processor = new AuditProcessor(context);
-            processor.Process();
+            ContextAuditor auditor = new ContextAuditor(context);
+            auditor.AuditPendingDataModifications();
 
             context.AssertWasCalled(c => c.InsertAuditRecord(Arg<AuditedEntity>.Is.Anything));
         }

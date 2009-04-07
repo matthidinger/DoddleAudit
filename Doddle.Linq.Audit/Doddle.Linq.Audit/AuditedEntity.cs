@@ -49,8 +49,8 @@ namespace Doddle.Linq.Audit
                 object pk = AuditAssociation.PkSelector.Compile().DynamicInvoke(Entity);
                 AssociationTableKey = new EntityKey(pk);
                 
-                // Temporary hack to get around Entity Framework complications, including not providing access to FK properties.
-                // When DeleteObject() is called it nulls out all references for some reason, making the FK Selector delegate fail
+                // HACK: Temporary try/catch to get around Entity Framework complications, including not providing access to FK properties by ID.
+                // When DeleteObject() is called it nulls out all foreign property references for some reason, making the FK Selector delegate fail
                 try
                 {
                     object fk = AuditAssociation.FkSelector.Compile().DynamicInvoke(Entity);

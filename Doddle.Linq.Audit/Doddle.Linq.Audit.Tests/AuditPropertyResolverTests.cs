@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using System.Text;
 using System.Collections.Generic;
@@ -33,8 +33,8 @@ namespace Doddle.Linq.Audit.Tests
 
             context.Expect(c => c.InsertAuditRecord(Arg<AuditedEntity>.Matches(e => e.ModifiedFields.Any(p => (string)p.NewValue == "Beverages"))));
 
-            AuditProcessor processor = new AuditProcessor(context);
-            processor.Process();
+            ContextAuditor auditor = new ContextAuditor(context);
+            auditor.AuditPendingDataModifications();
 
             context.VerifyAllExpectations();
         }
@@ -46,8 +46,8 @@ namespace Doddle.Linq.Audit.Tests
 
             context.Expect(c => c.InsertAuditRecord(Arg<AuditedEntity>.Matches(e => e.ModifiedFields.Any(p => p.FieldName == "Category"))));
 
-            AuditProcessor processor = new AuditProcessor(context);
-            processor.Process();
+            ContextAuditor auditor = new ContextAuditor(context);
+            auditor.AuditPendingDataModifications();
 
             context.VerifyAllExpectations();
         }

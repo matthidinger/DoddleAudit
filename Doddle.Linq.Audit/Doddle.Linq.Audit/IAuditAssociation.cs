@@ -9,7 +9,7 @@ namespace Doddle.Linq.Audit
 {
     public interface IAuditAssociation
     {
-        Type ParentEntityType { get; }
+        IAuditDefinition AuditDefinition { get; }
         Type EntityType { get; }
 
         LambdaExpression PkSelector { get; set; }

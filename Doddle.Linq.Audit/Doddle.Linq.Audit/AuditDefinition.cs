@@ -47,8 +47,7 @@ namespace Doddle.Linq.Audit
         /// <example>db.Orders.Audit(o => o.OrderID).AuditAssociation&lt;Order_Details&gt;(od => od.Order_DetailID, od => od.OrderID);</example>
         public AuditDefinition<TEntity> AuditAssociation<TAssociation>(Expression<Func<TAssociation, object>> pkSelector, Expression<Func<TAssociation, object>> fkSelector)
         {
-            var relationship = new AuditAssociation<TAssociation>();
-            relationship.ParentEntityType = typeof(TEntity);
+            var relationship = new AuditAssociation<TAssociation>(this);
             relationship.PkSelector = pkSelector;
             relationship.FkSelector = fkSelector;
             Relationships.Add(relationship);
@@ -66,8 +65,7 @@ namespace Doddle.Linq.Audit
         /// <example>db.Orders.Audit(o => o.OrderID).AuditAssociation(o => o.Order_Details);</example>
         public AuditDefinition<TEntity> AuditAssociation<TAssociation>(Expression<Func<TEntity, IEnumerable<TAssociation>>> relatedEntity) where TAssociation : class
         {
-            var relationship = new AuditAssociation<TAssociation>();
-            relationship.ParentEntityType = typeof(TEntity);
+            var relationship = new AuditAssociation<TAssociation>(this);
             relationship.PkSelector = Context.GetEntityPkProperty<TAssociation>();
 
             relationship.FkSelector = Context.GetPropertySelector<TAssociation>(Context.GetEntityRelationshipKeyName<TEntity, TAssociation>());
