@@ -89,11 +89,12 @@
     <Compile Include="AuditResolverAttribute.cs" />
     <Compile Include="AuditedEntity.cs" />
     <Compile Include="AuditAssociation.cs" />
+    <Compile Include="DataAnnotationsAuditPropertyResolver.cs" />
+    <Compile Include="EntityFramework\AuditableObjectContext.cs" />
     <Compile Include="EntityKey.cs" />
     <Compile Include="AuditedEntityField.cs" />
     <Compile Include="AuditPropertyResolver.cs" />
     <Compile Include="CustomizedAuditProperty.cs" />
-    <Compile Include="EntityFramework\AuditableObjectContext.cs" />
     <Compile Include="Helpers\ReflectionExtensions.cs" />
     <Compile Include="Helpers\StringExtensions.cs" />
     <Compile Include="IAuditableContext.cs" />
