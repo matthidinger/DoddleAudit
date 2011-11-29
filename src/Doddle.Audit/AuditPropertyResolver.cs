@@ -1,75 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Reflection;
 using System.Linq.Expressions;
 using Doddle.Audit.Helpers;
 
 namespace Doddle.Audit
 {
-    public class DataAnnotationsAuditPropertyResolver : AuditPropertyResolver
-    {
-        private static string GetPropertyValue(DisplayFormatAttribute format, object input)
-        {
-            if (input == null)
-            {
-                if (format != null && format.NullDisplayText != null)
-                    return format.NullDisplayText;
-
-                return null;
-            }
-
-            if (format != null && format.DataFormatString != null)
-            {
-                return string.Format(format.DataFormatString, input);
-            }
-
-            return input.ToString();
-        }
-
-        public override AuditedEntityField GetAuditValue(MemberInfo member, object oldValue, object newValue)
-        {
-            var field = new AuditedEntityField(member.Name);
-
-            var attributes = new List<Attribute>(member.GetCustomAttributes(true).OfType<Attribute>());
-
-            var dataTypeAttribute = attributes.OfType<DataTypeAttribute>().FirstOrDefault();
-
-            var displayFormatAttribute = attributes.OfType<DisplayFormatAttribute>().FirstOrDefault();
-            if (displayFormatAttribute == null && dataTypeAttribute != null)
-            {
-                displayFormatAttribute = dataTypeAttribute.DisplayFormat;
-            }
-
-            var displayAttribute = attributes.OfType<DisplayAttribute>().FirstOrDefault();
-            string str = null;
-            if (displayAttribute != null)
-            {
-                field.ShortDisplayName = displayAttribute.GetShortName();
-                str = displayAttribute.GetName();
-            }
-            if (str != null)
-            {
-                field.DisplayName = str;
-            }
-            else
-            {
-                var displayNameAttribute = attributes.OfType<DisplayNameAttribute>().FirstOrDefault();
-                if (displayNameAttribute != null)
-                    field.DisplayName = displayNameAttribute.DisplayName;
-            }
-
-            field.OldValue = GetPropertyValue(displayFormatAttribute, oldValue);
-            field.NewValue = GetPropertyValue(displayFormatAttribute, newValue);
-
-            return field;
-        }
-    }
-
     public class AuditPropertyResolver : IAuditPropertyResolver
     {
+#if NET35
+        public static IAuditPropertyResolver Default = new AuditPropertyResolver();
+#else
+        public static IAuditPropertyResolver Default = new DataAnnotationsAuditPropertyResolver();
+#endif
+
         private static string GetPropertyValue(object input)
         {
             return (input == null) ? string.Empty : input.ToString();
@@ -105,7 +49,6 @@ namespace Doddle.Audit
             var a = attributes.GetValue(0) as AuditResolverAttribute;
 
             return Activator.CreateInstance(a.ResolverType) as IAuditPropertyResolver;
-
         }
     }
 
@@ -116,7 +59,7 @@ namespace Doddle.Audit
             CustomizeProperties();
         }
 
-        private readonly AuditPropertyResolver _defaultResolver = new DataAnnotationsAuditPropertyResolver();
+        
         private readonly Dictionary<MemberInfo, CustomizedAuditProperty> _customizedProperties = new Dictionary<MemberInfo, CustomizedAuditProperty>();
 
         protected abstract void CustomizeProperties();
@@ -154,7 +97,7 @@ namespace Doddle.Audit
             }
             else
             {
-                value = _defaultResolver.GetAuditValue(member, oldValue, newValue);
+                value = AuditPropertyResolver.Default.GetAuditValue(member, oldValue, newValue);
             }
 
             return value;
