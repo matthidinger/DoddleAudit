@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestLists xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <TestList name="Lists of Tests" id="8c43106b-9dc1-4907-a29f-aa66a61bf5b6">
+    <RunConfiguration id="b9096462-db98-4711-9954-6010eb801613" name="Local Test Run" storage="localtestrun.testrunconfig" type="Microsoft.VisualStudio.TestTools.Common.TestRunConfiguration, Microsoft.VisualStudio.QualityTools.Common,   PublicKeyToken=b03f5f7f11d50a3a" />
+  </TestList>
+  <TestList name="Integration tests" id="b1db67f0-627e-4a0f-8a44-60039a6b1d2d" parentListId="8c43106b-9dc1-4907-a29f-aa66a61bf5b6">
+    <TestLinks>
+      <TestLink id="f1789d95-0595-1214-e9a8-dbdfaaa42cd2" name="AuditableObjectContext_Audits_Correctly" storage="doddle.linq.audit.tests\bin\debug\doddle.linq.audit.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
+    </TestLinks>
+  </TestList>
+  <TestList name="UnitTests" id="f030458a-4aa9-42c2-b587-3930d2a17399" parentListId="8c43106b-9dc1-4907-a29f-aa66a61bf5b6">
+    <TestLinks>
+      <TestLink id="c3097a4a-3640-82f8-be97-fac2919079ba" name="AuditProcessor_Inserts_Audit_Records_In_AuditableContext" storage="doddle.linq.audit.tests\bin\debug\doddle.linq.audit.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="cb8fb7b4-08f6-9825-7bd9-25df9493f5fb" name="Able_To_Get_Resolver_From_Attribute" storage="doddle.linq.audit.tests\bin\debug\doddle.linq.audit.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="04ccd929-b7d1-6caf-7a4e-f76233ba2e94" name="Custom_AuditResolver_Can_Customize_Property_Name" storage="doddle.linq.audit.tests\bin\debug\doddle.linq.audit.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="04017230-ad42-193f-1117-c176e5f2ac3b" name="Association_Gets_Added_To_AuditDefinition" storage="doddle.linq.audit.tests\bin\debug\doddle.linq.audit.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="ef783376-a613-7907-b741-b4004f0c43d1" name="Audit_Definition_Gets_Added" storage="doddle.linq.audit.tests\bin\debug\doddle.linq.audit.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="b09ec6d7-1b93-0f9c-823d-de7b1283c21a" name="Custom_AuditResolver_Can_Customize_Properties" storage="doddle.linq.audit.tests\bin\debug\doddle.linq.audit.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="4f6dda59-0e86-3a5f-1864-1a3fd8f2e6bd" name="Audit_Definition_Can_Resolve_Primary_Key" storage="doddle.linq.audit.tests\bin\debug\doddle.linq.audit.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
+    </TestLinks>
+  </TestList>
+</TestLists>
