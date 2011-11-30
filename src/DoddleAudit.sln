@@ -15,6 +15,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doddle.Audit.EntityFramewor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doddle.Audit.v35", "Doddle.Audit.v35\Doddle.Audit.v35.csproj", "{7D167F47-9554-40D9-806F-D8411DF8A273}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{F0E9C364-3BBB-483D-8913-2225FCAC9C27}"
+	ProjectSection(SolutionItems) = preProject
+		..\nuget\Doddle.Audit.EntityFramework.nuspec = ..\nuget\Doddle.Audit.EntityFramework.nuspec
+		..\nuget\Doddle.Audit.nuspec = ..\nuget\Doddle.Audit.nuspec
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = DoddleAudit.vsmdi

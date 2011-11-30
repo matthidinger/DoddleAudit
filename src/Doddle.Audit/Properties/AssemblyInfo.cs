@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Doddle.Linq.Audit")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Doddle.Audit")]
+[assembly: AssemblyDescription("Auditing Framework for .NET")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Doddle.Linq.Audit")]
+[assembly: AssemblyCompany("Matt Hidinger")]
+[assembly: AssemblyProduct("Doddle.Audit")]
 [assembly: AssemblyCopyright("Copyright ©  2009")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

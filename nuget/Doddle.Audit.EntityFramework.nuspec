@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>DoddleAudit.EntityFramework</id>
+    <version>1.0</version>
+    <authors>Matt Hidinger</authors>
+    <owners>Matt Hidinger</owners>
+    <licenseUrl>http://doddleaudit.codeplex.com/license</licenseUrl>
+    <projectUrl>http://doddleaudit.codeplex.com</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Package description</description>
+    <copyright>Copyright 2011</copyright>
+    <tags>audit linq entityframework doddle.audit</tags>
+    <dependencies>
+      <dependency id="DoddleAudit" version="1.0" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\src\Doddle.Audit.EntityFramework\bin\release\Doddle.Audit.EntityFramework.dll" target="lib"></file>
+  </files>
+</package>
