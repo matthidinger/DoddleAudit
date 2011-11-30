@@ -33,6 +33,7 @@ namespace Doddle.Audit
             }
         }
 
+
         /// <summary>
         /// Include an association (relationship) table tao audit along with the parent table. 
         /// Use this overload to explicity define the primary and foreign key relationship of the association.
