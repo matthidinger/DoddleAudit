@@ -16,6 +16,6 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="..\src\Doddle.Audit.EntityFramework\bin\release\Doddle.Audit.EntityFramework.dll" target="lib"></file>
+    <file src="..\src\DoddleAudit.EntityFramework\bin\release\DoddleAudit.EntityFramework.dll" target="lib"></file>
   </files>
 </package>

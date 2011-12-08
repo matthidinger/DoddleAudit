@@ -7,13 +7,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doddle.Audit", "Doddle.Audit\Doddle.Audit.csproj", "{29CB7E4E-6D00-4649-BB2B-DDBB956AC8DF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoddleAudit", "DoddleAudit\DoddleAudit.csproj", "{29CB7E4E-6D00-4649-BB2B-DDBB956AC8DF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doddle.Audit.Tests", "Doddle.Audit.Tests\Doddle.Audit.Tests.csproj", "{1F00992C-1B41-40C9-8D4D-D0900F6A9A06}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoddleAudit.Tests", "DoddleAudit.Tests\DoddleAudit.Tests.csproj", "{1F00992C-1B41-40C9-8D4D-D0900F6A9A06}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doddle.Audit.EntityFramework", "Doddle.Audit.EntityFramework\Doddle.Audit.EntityFramework.csproj", "{A062FB01-C2E8-409C-B82A-64700A3B7D1A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoddleAudit.EntityFramework", "DoddleAudit.EntityFramework\DoddleAudit.EntityFramework.csproj", "{A062FB01-C2E8-409C-B82A-64700A3B7D1A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doddle.Audit.v35", "Doddle.Audit.v35\Doddle.Audit.v35.csproj", "{7D167F47-9554-40D9-806F-D8411DF8A273}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoddleAudit.v35", "DoddleAudit.v35\DoddleAudit.v35.csproj", "{7D167F47-9554-40D9-806F-D8411DF8A273}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{F0E9C364-3BBB-483D-8913-2225FCAC9C27}"
 	ProjectSection(SolutionItems) = preProject
