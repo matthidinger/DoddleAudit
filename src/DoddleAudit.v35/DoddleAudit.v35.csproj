@@ -12,8 +12,7 @@
     <AssemblyName>DoddleAudit</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -28,15 +27,15 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;NET35</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
@@ -46,41 +45,35 @@
     <Compile Include="..\DoddleAudit\AuditAction.cs">
       <Link>AuditAction.cs</Link>
     </Compile>
-    <Compile Include="..\DoddleAudit\AuditAssociation.cs">
-      <Link>AuditAssociation.cs</Link>
-    </Compile>
-    <Compile Include="..\DoddleAudit\AuditDefinition.cs">
-      <Link>AuditDefinition.cs</Link>
-    </Compile>
     <Compile Include="..\DoddleAudit\AuditedEntity.cs">
       <Link>AuditedEntity.cs</Link>
     </Compile>
-    <Compile Include="..\DoddleAudit\AuditedEntityField.cs">
-      <Link>AuditedEntityField.cs</Link>
+    <Compile Include="..\DoddleAudit\AuditedProperty.cs">
+      <Link>AuditedProperty.cs</Link>
     </Compile>
-    <Compile Include="..\DoddleAudit\AuditExtensions.cs">
-      <Link>AuditExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\DoddleAudit\AuditPropertyResolver.cs">
-      <Link>AuditPropertyResolver.cs</Link>
-    </Compile>
-    <Compile Include="..\DoddleAudit\AuditResolverAttribute.cs">
-      <Link>AuditResolverAttribute.cs</Link>
+    <Compile Include="..\DoddleAudit\ContextAuditConfiguration.cs">
+      <Link>ContextAuditConfiguration.cs</Link>
     </Compile>
     <Compile Include="..\DoddleAudit\ContextAuditor.cs">
       <Link>ContextAuditor.cs</Link>
     </Compile>
-    <Compile Include="..\DoddleAudit\CustomizedAuditProperty.cs">
-      <Link>CustomizedAuditProperty.cs</Link>
-    </Compile>
-    <Compile Include="..\DoddleAudit\DataAnnotationsAuditPropertyResolver.cs">
-      <Link>DataAnnotationsAuditPropertyResolver.cs</Link>
+    <Compile Include="..\DoddleAudit\CustomPropertyAuditor.cs">
+      <Link>CustomPropertyAuditor.cs</Link>
     </Compile>
     <Compile Include="..\DoddleAudit\EmptyPropertyMode.cs">
       <Link>EmptyPropertyMode.cs</Link>
     </Compile>
+    <Compile Include="..\DoddleAudit\EntityAuditConfiguration.cs">
+      <Link>EntityAuditConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\DoddleAudit\EntityAuditor.cs">
+      <Link>EntityAuditor.cs</Link>
+    </Compile>
     <Compile Include="..\DoddleAudit\EntityKey.cs">
       <Link>EntityKey.cs</Link>
+    </Compile>
+    <Compile Include="..\DoddleAudit\Helpers\AuditExtensions.cs">
+      <Link>Helpers\AuditExtensions.cs</Link>
     </Compile>
     <Compile Include="..\DoddleAudit\Helpers\ReflectionExtensions.cs">
       <Link>Helpers\ReflectionExtensions.cs</Link>
@@ -91,14 +84,17 @@
     <Compile Include="..\DoddleAudit\IAuditableContext.cs">
       <Link>IAuditableContext.cs</Link>
     </Compile>
-    <Compile Include="..\DoddleAudit\IAuditAssociation.cs">
-      <Link>IAuditAssociation.cs</Link>
+    <Compile Include="..\DoddleAudit\IEntityAuditConfiguration.cs">
+      <Link>IEntityAuditConfiguration.cs</Link>
     </Compile>
-    <Compile Include="..\DoddleAudit\IAuditDefinition.cs">
-      <Link>IAuditDefinition.cs</Link>
+    <Compile Include="..\DoddleAudit\IEntityAuditor.cs">
+      <Link>IEntityAuditor.cs</Link>
     </Compile>
-    <Compile Include="..\DoddleAudit\IAuditPropertyResolver.cs">
-      <Link>IAuditPropertyResolver.cs</Link>
+    <Compile Include="..\DoddleAudit\IPropertyAuditor.cs">
+      <Link>IPropertyAuditor.cs</Link>
+    </Compile>
+    <Compile Include="..\DoddleAudit\IRelatationshipConfiguration.cs">
+      <Link>IRelatationshipConfiguration.cs</Link>
     </Compile>
     <Compile Include="..\DoddleAudit\LinqToSql\AuditableDataContext.cs">
       <Link>LinqToSql\AuditableDataContext.cs</Link>
@@ -106,13 +102,21 @@
     <Compile Include="..\DoddleAudit\LinqToSql\LinqToSqlAuditExtensions.cs">
       <Link>LinqToSql\LinqToSqlAuditExtensions.cs</Link>
     </Compile>
-    <Compile Include="..\DoddleAudit\MemberAudit.cs">
-      <Link>MemberAudit.cs</Link>
+    <Compile Include="..\DoddleAudit\ModifiedProperty.cs">
+      <Link>ModifiedProperty.cs</Link>
+    </Compile>
+    <Compile Include="..\DoddleAudit\PropertyAuditor.cs">
+      <Link>PropertyAuditor.cs</Link>
+    </Compile>
+    <Compile Include="..\DoddleAudit\RelatationshipConfiguration.cs">
+      <Link>RelatationshipConfiguration.cs</Link>
     </Compile>
     <Compile Include="..\DoddleAudit\RelationshipChangeEntry.cs">
       <Link>RelationshipChangeEntry.cs</Link>
     </Compile>
-    <Compile Include="DisplayAttribute.cs" />
+    <Compile Include="..\DoddleAudit\RelationshipEntityAuditor.cs">
+      <Link>RelationshipEntityAuditor.cs</Link>
+    </Compile>
     <Compile Include="Helpers\EnumExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

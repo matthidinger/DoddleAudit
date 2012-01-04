@@ -72,6 +72,7 @@
     <Reference Include="System.Data.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -83,29 +84,32 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuditAction.cs" />
-    <Compile Include="AuditDefinition.cs" />
-    <Compile Include="AuditExtensions.cs" />
+    <Compile Include="ContextAuditConfiguration.cs" />
+    <Compile Include="EntityAuditor.cs" />
+    <Compile Include="Helpers\AuditExtensions.cs" />
+    <Compile Include="EntityAuditConfiguration.cs" />
+    <Compile Include="IEntityAuditConfiguration.cs" />
+    <Compile Include="CustomPropertyAuditor.cs" />
     <Compile Include="ContextAuditor.cs" />
-    <Compile Include="AuditResolverAttribute.cs" />
     <Compile Include="AuditedEntity.cs" />
-    <Compile Include="AuditAssociation.cs" />
-    <Compile Include="DataAnnotationsAuditPropertyResolver.cs" />
+    <Compile Include="RelatationshipConfiguration.cs" />
+    <Compile Include="DataAnnotationsPropertyAuditor.cs" />
     <Compile Include="EntityFramework\AuditableObjectContext.cs" />
     <Compile Include="EntityKey.cs" />
-    <Compile Include="AuditedEntityField.cs" />
-    <Compile Include="AuditPropertyResolver.cs" />
-    <Compile Include="CustomizedAuditProperty.cs" />
+    <Compile Include="AuditedProperty.cs" />
+    <Compile Include="PropertyAuditor.cs" />
     <Compile Include="Helpers\ReflectionExtensions.cs" />
     <Compile Include="Helpers\StringExtensions.cs" />
     <Compile Include="IAuditableContext.cs" />
-    <Compile Include="IAuditDefinition.cs" />
-    <Compile Include="IAuditAssociation.cs" />
-    <Compile Include="IAuditPropertyResolver.cs" />
+    <Compile Include="IEntityAuditor.cs" />
+    <Compile Include="IRelatationshipConfiguration.cs" />
+    <Compile Include="IPropertyAuditor.cs" />
     <Compile Include="LinqToSql\AuditableDataContext.cs" />
     <Compile Include="LinqToSql\LinqToSqlAuditExtensions.cs" />
-    <Compile Include="MemberAudit.cs" />
+    <Compile Include="ModifiedProperty.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="EmptyPropertyMode.cs" />
+    <Compile Include="RelationshipEntityAuditor.cs" />
     <Compile Include="RelationshipChangeEntry.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -125,6 +129,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

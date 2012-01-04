@@ -6,81 +6,79 @@ namespace DoddleAudit.Tests.Fakes
 {
     public class FakeAuditableContext : IAuditableContext
     {
-        public FakeAuditableContext()
+        private readonly ContextAuditConfiguration _configuration = new ContextAuditConfiguration();
+        public ContextAuditConfiguration AuditConfiguration { get { return _configuration; } }
+
+        public int SavePendingChanges()
         {
-            AuditingEnabled = true;
+            return 0;
         }
 
-        private readonly IList<IAuditDefinition> _auditDefinitions = new List<IAuditDefinition>();
-        public IList<IAuditDefinition> AuditDefinitions
+
+        private readonly IList<IEntityAuditor> _entityAuditors = new List<IEntityAuditor>();
+
+        private readonly List<object> _pendingInserts = new List<object>();
+        private readonly List<object> _pendingUpdates = new List<object>();
+        private readonly List<object> _pendingDeletes = new List<object>();
+
+        public IList<IEntityAuditor> EntityAuditors
         {
-            get { return _auditDefinitions; }
+            get { return _entityAuditors; }
         }
 
-        public IEnumerable<object> Inserts
+
+        public void AddInsert(object entity)
         {
-            get
-            {
-                var products = new List<object>
-                                            {
-                                                new Product {ID = 1, CategoryID=1, ProductName = "Chai"}
-                                            };
-
-                return products;
-
-            }
+            _pendingInserts.Add(entity);
         }
 
-        public IEnumerable<object> Updates
+        public void AddUpdate(object entity)
         {
-            get { yield break; }
+            _pendingUpdates.Add(entity);
         }
 
-        public IEnumerable<object> Deletes
+        public void AddDelete(object entity)
         {
-            get { yield break; }
+            _pendingDeletes.Add(entity);
         }
 
-        public virtual void InsertAuditRecord(AuditedEntity record)
+        public IEnumerable<object> PendingInserts
+        {
+            get { return _pendingInserts; }
+        }
+
+        public IEnumerable<object> PendingUpdates
+        {
+            get { return _pendingUpdates; }
+        }
+
+        public IEnumerable<object> PendingDeletes
+        {
+            get { return _pendingDeletes; }
+        }
+
+        public virtual void SaveAuditedEntity(AuditedEntity record)
         {
 
         }
 
-        public virtual IEnumerable<MemberAudit> GetModifiedFields(object entity)
+        public virtual IEnumerable<ModifiedProperty> GetModifiedProperties(object entity)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public virtual PropertyInfo GetEntityPrimaryKey<TEntity>()
+        public virtual PropertyInfo GetPrimaryKeyProperty(Type entityType)
         {
             //return typeof(TEntity).GetProperty("ID");
             return null;
         }
 
-        public virtual string GetEntityRelationshipKeyName<T, TR>()
+        public virtual string GetForeignKeyPropertyName(Type entityType, Type parentEntityType)
         {
             return "";
         }
 
-        public EmptyPropertyMode EmptyPropertyMode { get; set; }
-
-
-        private List<Func<MemberInfo, object, bool>> _propertyAuditRules = new List<Func<MemberInfo, object, bool>>();
-
-        public IList<Func<MemberInfo, object, bool>> PropertyAuditRules
-        {
-            get { return _propertyAuditRules; }
-        }
-
-        private IDictionary<Type, IAuditPropertyResolver> _resolvers = new Dictionary<Type, IAuditPropertyResolver>();
-
-        public IDictionary<Type, IAuditPropertyResolver> Resolvers
-        {
-            get { return _resolvers; }
-        }
-
-        public bool AuditingEnabled { get; set; }
-
+ 
         public Type GetEntityType(Type entityType)
         {
             return entityType;

@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{084C9323-5300-4AE0-82BB-E0C61251FE78}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DoddleAudit.EntityFramework.Tests</RootNamespace>
+    <AssemblyName>DoddleAudit.EntityFramework.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework">
+      <HintPath>..\packages\EntityFramework.4.2.0.0\lib\net40\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Transactions" />
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDependentAssemblyPaths Condition=" '$(VS100COMNTOOLS)' != '' " Include="$(VS100COMNTOOLS)..\IDE\PrivateAssemblies">
+      <Visible>False</Visible>
+    </CodeAnalysisDependentAssemblyPaths>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\doddleaudit.sample.web\models\AuditRecord.cs">
+      <Link>EFDbContext\AuditRecord.cs</Link>
+    </Compile>
+    <Compile Include="..\doddleaudit.sample.web\models\AuditRecordProperty.cs">
+      <Link>EFDbContext\AuditRecordProperty.cs</Link>
+    </Compile>
+    <Compile Include="..\doddleaudit.sample.web\models\Category.cs">
+      <Link>EFDbContext\Category.cs</Link>
+    </Compile>
+    <Compile Include="..\doddleaudit.sample.web\models\ECommerceDb.cs">
+      <Link>EFDbContext\ECommerceDb.cs</Link>
+    </Compile>
+    <Compile Include="..\doddleaudit.sample.web\models\ECommerceDbInitializer.cs">
+      <Link>EFDbContext\ECommerceDbInitializer.cs</Link>
+    </Compile>
+    <Compile Include="..\doddleaudit.sample.web\models\efconfig\ProductConfig.cs">
+      <Link>EFDbContext\EfConfig\ProductConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\doddleaudit.sample.web\models\Product.cs">
+      <Link>EFDbContext\Product.cs</Link>
+    </Compile>
+    <Compile Include="..\doddleaudit.sample.web\models\Promotion.cs">
+      <Link>EFDbContext\Promotion.cs</Link>
+    </Compile>
+    <Compile Include="EFDbContext\DbContextTests.cs" />
+    <Compile Include="Helpers\RolledBackDbTests.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.Config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DoddleAudit.EntityFramework\DoddleAudit.EntityFramework.csproj">
+      <Project>{A062FB01-C2E8-409C-B82A-64700A3B7D1A}</Project>
+      <Name>DoddleAudit.EntityFramework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DoddleAudit\DoddleAudit.csproj">
+      <Project>{29CB7E4E-6D00-4649-BB2B-DDBB956AC8DF}</Project>
+      <Name>DoddleAudit</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -2,12 +2,15 @@
 
 namespace DoddleAudit
 {
+    /// <summary>
+    /// Specify how to audit properties which have a null or empty value
+    /// </summary>
     [Flags]
     public enum EmptyPropertyMode
     {
-        None = 0,
+        AlwaysAudit = 0,
         ExcludeEmptyOnInsert = 1,
         ExcludeEmptyOnDelete = 2,
-        ExcludeEmptyOnInsertOrDelete = ExcludeEmptyOnInsert | ExcludeEmptyOnDelete
+        NeverAudit = ExcludeEmptyOnInsert | ExcludeEmptyOnDelete
     }
 }

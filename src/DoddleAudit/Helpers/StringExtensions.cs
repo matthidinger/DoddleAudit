@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 
-namespace DoddleAudit.Helpers
+namespace DoddleAudit
 {
     public static class StringExtensions
     {

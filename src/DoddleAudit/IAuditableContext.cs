@@ -6,23 +6,25 @@ namespace DoddleAudit
 {
     public interface IAuditableContext
     {
-        IList<IAuditDefinition> AuditDefinitions { get; }
+        IList<IEntityAuditor> EntityAuditors { get; }
 
-        IEnumerable<object> Inserts { get; }
-        IEnumerable<object> Updates { get; }
-        IEnumerable<object> Deletes { get; }
+        IEnumerable<object> PendingInserts { get; }
+        IEnumerable<object> PendingUpdates { get; }
+        IEnumerable<object> PendingDeletes { get; }
+
+        /// <summary>
+        /// Use this method to define how to save the actual audit record into the database
+        /// </summary>
+        void SaveAuditedEntity(AuditedEntity record);
         
-        void InsertAuditRecord(AuditedEntity record);
-        
-        IEnumerable<MemberAudit> GetModifiedFields(object entity);
-        PropertyInfo GetEntityPrimaryKey<TEntity>();
-        string GetEntityRelationshipKeyName<T, TR>();
+        IEnumerable<ModifiedProperty> GetModifiedProperties(object entity);
 
-        EmptyPropertyMode EmptyPropertyMode { get; set; }
+        PropertyInfo GetPrimaryKeyProperty(Type entityType);
+        string GetForeignKeyPropertyName(Type entityType, Type parentEntityType);
 
-        IList<Func<MemberInfo, object, bool>> PropertyAuditRules { get; }
-        IDictionary<Type, IAuditPropertyResolver> Resolvers { get; }
-        bool AuditingEnabled { get; set; }
         Type GetEntityType(Type entityType);
+
+        ContextAuditConfiguration AuditConfiguration { get; }
+        int SavePendingChanges();
     }
 }

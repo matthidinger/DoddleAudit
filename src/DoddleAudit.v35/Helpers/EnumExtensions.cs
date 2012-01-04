@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DoddleAudit.Helpers
+namespace DoddleAudit
 {
     public static class EnumExtensions
     {
