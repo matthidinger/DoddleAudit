@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoddleAudit.Sample.Web", "D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoddleAudit.EntityFramework.Tests", "DoddleAudit.EntityFramework.Tests\DoddleAudit.EntityFramework.Tests.csproj", "{084C9323-5300-4AE0-82BB-E0C61251FE78}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{F7792E33-6F91-4D12-ABB2-A183926D64CB}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = DoddleAudit.vsmdi
@@ -66,5 +68,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{7AC425FE-EECF-4529-B8E6-1229A6210232} = {95094C4D-5A16-4D21-8839-004122CC77BD}
+		{084C9323-5300-4AE0-82BB-E0C61251FE78} = {F7792E33-6F91-4D12-ABB2-A183926D64CB}
+		{1F00992C-1B41-40C9-8D4D-D0900F6A9A06} = {F7792E33-6F91-4D12-ABB2-A183926D64CB}
 	EndGlobalSection
 EndGlobal
