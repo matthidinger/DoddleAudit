@@ -1,6 +1,5 @@
 ﻿namespace DoddleAudit.Tests.Fakes
 {
-    [AuditResolver(typeof(ProductAuditResolver))]
     public class Product
     {
         public int ID { get; set; }

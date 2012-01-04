@@ -1,6 +1,6 @@
 ﻿namespace DoddleAudit
 {
-    public enum AuditAction : byte
+    public enum AuditAction
     {
         Insert,
         Update,

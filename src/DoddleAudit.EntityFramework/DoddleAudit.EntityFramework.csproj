@@ -55,14 +55,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AuditableDataContext.cs" />
-    <Compile Include="EfAuditExtensions.cs" />
+    <Compile Include="AuditableDbContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DoddleAudit\DoddleAudit.csproj">
       <Project>{29CB7E4E-6D00-4649-BB2B-DDBB956AC8DF}</Project>
-      <Name>Doddle.Audit</Name>
+      <Name>DoddleAudit</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

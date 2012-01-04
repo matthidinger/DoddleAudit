@@ -1,156 +1,91 @@
 ﻿using System;
-using System.Reflection;
 using System.Collections;
-using DoddleAudit.Helpers;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Transactions;
 
 namespace DoddleAudit
 {
     public class ContextAuditor
     {
         private readonly IAuditableContext _context;
+        private readonly List<AuditedEntity> _auditedEntities = new List<AuditedEntity>();
+        private bool _initialized;
 
         public ContextAuditor(IAuditableContext context)
         {
+            if (context == null) throw new ArgumentNullException("context");
             _context = context;
         }
 
-        public void AuditPendingDataModifications()
+        public int AuditAndSaveChanges()
         {
-            if (_context.AuditingEnabled)
+            using (var scope = new TransactionScope())
             {
-                AuditRows(_context.Inserts, AuditAction.Insert);
-                AuditRows(_context.Updates, AuditAction.Update);
-                AuditRows(_context.Deletes, AuditAction.Delete);
+                if (!_initialized)
+                {
+                    _context.AuditConfiguration.PropertyAuditRules.Add(ShouldAuditProperty);
+                    _initialized = true;
+                }
+
+                if (_context.AuditConfiguration.AuditingEnabled)
+                {
+                    AuditRows(_context.PendingInserts, AuditAction.Insert);
+                    AuditRows(_context.PendingUpdates, AuditAction.Update);
+                    AuditRows(_context.PendingDeletes, AuditAction.Delete);
+                }
+
+                var result = _context.SavePendingChanges();
+
+                foreach (var record in _auditedEntities)
+                {
+                    if (record.Action == AuditAction.Insert)
+                    {
+                        record.UpdateKeys(record);
+                    }
+
+                    _context.SaveAuditedEntity(record);
+                }
+
+                _context.SavePendingChanges();
+                scope.Complete();
+                return result;
             }
         }
+
+
+        private static bool ShouldAuditProperty(PropertyInfo property, object entity)
+        {
+            if (property.PropertyType.IsPrimitive)
+                return true;
+
+            if (property.PropertyType.IsNullable())
+                return true;
+
+            if (property.PropertyType == typeof(decimal) || property.PropertyType == typeof(string))
+                return true;
+
+            return false;
+        }
+
 
         protected void AuditRows(IEnumerable entities, AuditAction action)
         {
-            if(entities == null)
+            if (entities == null)
                 return;
 
-            foreach (object entity in entities)
+            foreach (var entity in entities)
             {
-                if(entity == null)
+                if (entity == null)
                     continue;
-                
 
-                Type entityType = _context.GetEntityType(entity.GetType());
-                foreach (IAuditDefinition def in _context.AuditDefinitions)
+                var entityType = _context.GetEntityType(entity.GetType());
+                var entityAuditor = _context.GetEntityAuditor(entityType);
+
+                if (entityAuditor != null)
                 {
-                    if (ShouldAuditEntity(entityType, def.EntityType))
-                    {
-                        var record = new AuditedEntity(entity, def)
-                                         {
-                                             Action = action, 
-                                             EntityTable = _context.GetEntityType(entityType).Name
-                                         };
-
-                        AddModifiedPropertiesToRecord(action, entity, record);
-                        _context.InsertAuditRecord(record);
-
-                        continue;
-                    }
-
-                    foreach (IAuditAssociation relationship in def.Relationships)
-                    {
-                        if (ShouldAuditEntity(entityType, relationship.EntityType))
-                        {
-                            var record = new AuditedEntity(entity, relationship)
-                                             {
-                                                 Action = action,
-                                                 EntityTable = _context.GetEntityType(relationship.AuditDefinition.EntityType).Name,
-                                                 AssociationTable = _context.GetEntityType(relationship.EntityType).Name
-                                             };
-
-                            AddModifiedPropertiesToRecord(action, entity, record);
-                            _context.InsertAuditRecord(record);
-                        }
-                    }
-                }
-            }
-        }
-
-        private static bool ShouldAuditEntity(Type entityType, Type auditType)
-        {
-            return auditType.IsAssignableFrom(entityType);
-        }
-
-        private bool ShouldAuditProperty(AuditAction action, MemberInfo pi, object entity, IAuditPropertyResolver resolver, AuditedEntityField values)
-        {
-            bool auditableProperty = _context.ShouldAuditProperty(pi, entity) || resolver.IsMemberCustomized(pi);
-            
-            if(auditableProperty)
-            {
-                if (action == AuditAction.Insert && _context.EmptyPropertyMode.HasFlag(EmptyPropertyMode.ExcludeEmptyOnInsert))
-                {
-                    if(string.IsNullOrEmpty(values.NewValue))
-                        return false;
-                }
-                else if (action == AuditAction.Delete && _context.EmptyPropertyMode.HasFlag(EmptyPropertyMode.ExcludeEmptyOnDelete))
-                {
-                    if (string.IsNullOrEmpty(values.OldValue))
-                        return false;
-                }
-            }
-
-            return auditableProperty;
-        }
-
-        private void AddModifiedPropertiesToRecord(AuditAction action, object entity, AuditedEntity record)
-        {
-            var entityType = _context.GetEntityType(entity.GetType());
-            var resolver = AuditPropertyResolver.GetResolver(entityType);
-            if(resolver == null)
-            {
-                if(!_context.Resolvers.TryGetValue(entityType, out resolver))
-                {
-                    resolver = new AuditPropertyResolver();
-                }
-            }
-            
-
-            if (action == AuditAction.Update)
-            {
-                var mmi = _context.GetModifiedFields(entity);
-
-                foreach (MemberAudit mi in mmi)
-                {
-                    var values = resolver.GetAuditValue(mi.Member, mi.OriginalValue, mi.CurrentValue);
-                    if (ShouldAuditProperty(action, mi.Member, entity, resolver, values))
-                    {
-                        record.ModifiedFields.Add(values);
-                    }
-                }
-            }
-            else if (action == AuditAction.Insert)
-            {
-                var props = _context.GetEntityType(entity.GetType()).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy);
-                foreach (PropertyInfo pi in props)
-                {
-                    var newValue = pi.GetValue(entity, null);
-                    var values = resolver.GetAuditValue(pi, null, newValue);
-
-                    if (ShouldAuditProperty(action, pi, entity, resolver, values))
-                    {
-                        record.ModifiedFields.Add(values);
-                    }
-                }
-            }
-            else
-            {
-                var props = _context.GetEntityType(entity.GetType()).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy);
-                foreach (PropertyInfo pi in props)
-                {
-                    if (_context.ShouldAuditProperty(pi, entity))
-                    {
-                        var oldValue = pi.GetValue(entity, null);
-                        var values = resolver.GetAuditValue(pi, oldValue, null);
-                        if (ShouldAuditProperty(action, pi, entity, resolver, values))
-                        {
-                            record.ModifiedFields.Add(values);
-                        }
-                    }
+                    var auditedEntity = entityAuditor.AuditEntity(_context, entity, action);
+                    _auditedEntities.Add(auditedEntity);
                 }
             }
         }

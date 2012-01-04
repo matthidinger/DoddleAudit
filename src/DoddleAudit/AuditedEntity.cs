@@ -1,68 +1,46 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using DoddleAudit.Helpers;
 
 namespace DoddleAudit
 {
-    [DebuggerDisplay("Entity: {EntityTable}, Key: {EntityTableKey}, Action: {Action}")]
+    /// <summary>
+    /// Represents an Entity which has been audited
+    /// </summary>
+    [DebuggerDisplay("Entity Type: {EntityType.Name}, Key: {EntityKey}, Action: {Action}")]    
     public class AuditedEntity
     {
-        public AuditedEntity(object entity, IAuditDefinition auditDefinition)
+        private readonly List<AuditedProperty> _properties = new List<AuditedProperty>();
+
+
+        public AuditedEntity(object entity, AuditAction action, Action<AuditedEntity> updateKeys)
         {
-            AuditDefinition = auditDefinition;
+            if (entity == null) throw new ArgumentNullException("entity");
+            if (updateKeys == null) throw new ArgumentNullException("updateKeys");
+
             Entity = entity;
-            UpdateKeys();
+            Action = action;
+            UpdateKeys = updateKeys;
         }
 
-        public AuditedEntity(object entity, IAuditAssociation auditAssociation)
-        {
-            AuditAssociation = auditAssociation;
-            Entity = entity;
-            UpdateKeys();
-        }
+        public AuditAction Action { get; private set; }
 
-        public AuditAction Action { get; set; }
+        public object Entity { get; private set; }
+        public Type EntityType { get; set; }
 
-        public object Entity { get; set; }
+        // TODO: Get the Entity set name
+        public string EntitySetName { get; set; }
+        public EntityKey EntityKey { get; set; }
 
-        public string EntityTable { get; set; }
-        public EntityKey EntityTableKey { get; set; }
+        public Type ParentEntityType { get; set; }
+        public EntityKey ParentKey { get; set; }
 
-        public string AssociationTable { get; set; }
-        public EntityKey AssociationTableKey { get; set; }
 
-        private readonly List<AuditedEntityField> _fields = new List<AuditedEntityField>();
-        public IList<AuditedEntityField> ModifiedFields { get { return _fields; } }
-
-        internal IAuditDefinition AuditDefinition { get; set; }
-        internal IAuditAssociation AuditAssociation { get; set; }
+        public IList<AuditedProperty> ModifiedProperties { get { return _properties; } }
 
         /// <summary>
         /// New entities (inserts) will have a PK of 0 until LINQ submits changes to the DB and retrieves the real PK, so we need to update the Insert Audit record with the real PK
         /// </summary>
-        internal void UpdateKeys()
-        {
-            if (AuditAssociation != null)
-            {
-                object pk = AuditAssociation.PkSelector.Compile().DynamicInvoke(Entity);
-                AssociationTableKey = new EntityKey(pk);
-                
-                object fk = AuditAssociation.FkSelector.Compile().DynamicInvoke(Entity);
-                EntityTableKey = new EntityKey(fk);
-
-            }
-            else
-            {
-                object pk = AuditDefinition.PkSelector.Compile().DynamicInvoke(Entity);
-
-                var pkName = AuditDefinition.PkSelector.ToPropertyInfo().Name;
-                var field = ModifiedFields.SingleOrDefault(f => f.FieldName == pkName);
-                if (field != null)
-                    field.NewValue = pk.ToString();
-
-                EntityTableKey = new EntityKey(pk);
-            }
-        }
+        internal Action<AuditedEntity> UpdateKeys { get; private set; }
     }
 }

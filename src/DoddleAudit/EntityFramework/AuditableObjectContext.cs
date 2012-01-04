@@ -11,125 +11,103 @@ namespace DoddleAudit.EntityFramework
 {
     public abstract class AuditableObjectContext : ObjectContext, IAuditableContext
     {
+        private readonly List<IEntityAuditor> _entityAuditors = new List<IEntityAuditor>();
+
+        private readonly ContextAuditConfiguration _configuration = new ContextAuditConfiguration();
+        public ContextAuditConfiguration AuditConfiguration { get { return _configuration; } }
+
+
         #region Constructors
 
         protected AuditableObjectContext(string connectionString)
             : base(connectionString)
-        {
-            AuditingEnabled = true;            
+        {          
         }
 
         protected AuditableObjectContext(string connectinString, string defaultContainerName)
             : base(connectinString, defaultContainerName)
         {
-            AuditingEnabled = true;
-            
         }
         protected AuditableObjectContext(EntityConnection connection)
             : base(connection)
         {
-            AuditingEnabled = true;
-            
+
         }
         protected AuditableObjectContext(EntityConnection connection, string defaultContainerName)
             : base(connection, defaultContainerName)
         {
-            AuditingEnabled = true;
         }
 
         #endregion
 
         /// <summary>
-        /// This method defines how to insert the actual audit record into the database
+        /// Enlist a DbSet for automatic Auditing
         /// </summary>
-        /// <param name="record"></param>
-        protected abstract void InsertAuditRecordToDatabase(AuditedEntity record);
-
-
-        private readonly List<IAuditDefinition> _auditDefinitions = new List<IAuditDefinition>();
-        private readonly List<AuditedEntity> _queuedRecords = new List<AuditedEntity>();
-        private readonly List<Func<MemberInfo, object, bool>> _propertyAuditRules = new List<Func<MemberInfo, object, bool>>();
-
-
-        protected virtual void SaveChangesAndAudit()
+        public EntityAuditor<TEntity> Audit<TEntity>(ObjectSet<TEntity> objectSet) where TEntity : class
         {
-            PropertyAuditRules.Add(ShouldAuditProperty);
-
-            var auditor = new ContextAuditor(this);
-            auditor.AuditPendingDataModifications();
-
-            base.SaveChanges();
-
-            foreach (AuditedEntity record in _queuedRecords)
-            {
-                if (record.Action == AuditAction.Insert)
-                {
-                    record.UpdateKeys();
-                }
-                InsertAuditRecordToDatabase(record);
-            }
-
-            base.SaveChanges();
+            var def = new EntityAuditor<TEntity>(this.GetEntityPkProperty<TEntity>().ToPropertyInfo());
+            _entityAuditors.Add(def);
+            return def;
         }
+
+        int IAuditableContext.SavePendingChanges()
+        {
+            return base.SaveChanges();
+        }
+
+        public abstract void SaveAuditedEntity(AuditedEntity record);
+
 
         public new void SaveChanges()
         {
-            SaveChangesAndAudit();   
+            var auditor = new ContextAuditor(this);
+            AuditConfiguration.OnlyAuditPropertiesIf(ShouldAuditProperty);
+            auditor.AuditAndSaveChanges();  
         }
 
-        private bool ShouldAuditProperty(MemberInfo member, object entity)
+        private bool ShouldAuditProperty(PropertyInfo property, object entity)
         {
             var stateEntry = ObjectStateManager.GetObjectStateEntry(entity);
             return !stateEntry.IsRelationship;
         }
 
-        public IList<IAuditDefinition> AuditDefinitions
+        IList<IEntityAuditor> IAuditableContext.EntityAuditors
         {
-            get { return _auditDefinitions; }
+            get { return _entityAuditors; }
         }
 
-        public IEnumerable<object> Inserts
+        IEnumerable<object> IAuditableContext.PendingInserts
         {
             get { return ObjectStateManager.GetObjectStateEntries(EntityState.Added).Select(o => o.Entity); }
         }
 
-        public IEnumerable<object> Updates
+        IEnumerable<object> IAuditableContext.PendingUpdates
         {
             get { return ObjectStateManager.GetObjectStateEntries(EntityState.Modified).Select(o => o.Entity); }
         }
 
-        public IEnumerable<object> Deletes
+        IEnumerable<object> IAuditableContext.PendingDeletes
         {
             get { return ObjectStateManager.GetObjectStateEntries(EntityState.Deleted).Select(o => o.Entity); }
         }
 
-        public void InsertAuditRecord(AuditedEntity record)
-        {
-            _queuedRecords.Add(record);
-        }
 
-        public IEnumerable<MemberAudit> GetModifiedFields(object entity)
+        IEnumerable<ModifiedProperty> IAuditableContext.GetModifiedProperties(object entity)
         {
             ObjectStateEntry entry = ObjectStateManager.GetObjectStateEntry(entity);
             return
                 entry.GetModifiedProperties().Select(
                     p =>
-                    new MemberAudit(entity.GetType().GetProperty(p), entry.OriginalValues[p], entry.CurrentValues[p]));
+                    new ModifiedProperty(entity.GetType().GetProperty(p), entry.OriginalValues[p], entry.CurrentValues[p]));
         }
 
-        public PropertyInfo GetEntityPrimaryKey<TEntity>()
-        {
-            Type entityType = typeof(TEntity);
-            return GetEntityPrimaryKey(entityType);
-        }
 
-        private PropertyInfo GetEntityPrimaryKey(Type type)
+        PropertyInfo IAuditableContext.GetPrimaryKeyProperty(Type type)
         {
             EntityType entityType = (from meta in MetadataWorkspace.GetItems(DataSpace.CSpace)
-                               where meta.BuiltInTypeKind == BuiltInTypeKind.EntityType
-                               select meta)
-                              .OfType<EntityType>()
-                              .Where(e => e.Name == type.Name).Single();
+                                     where meta.BuiltInTypeKind == BuiltInTypeKind.EntityType
+                                     select meta)
+                .OfType<EntityType>().Single(e => e.Name == type.Name);
 
             return type.GetProperty(entityType.KeyMembers[0].Name);
         }
@@ -143,16 +121,12 @@ namespace DoddleAudit.EntityFramework
             return entitySetName;
         }
 
-        public string GetEntityRelationshipKeyName<T, TR>()
+        string IAuditableContext.GetForeignKeyPropertyName(Type entityType, Type parentEntityType)
         {
-            Type entityType = typeof(T);
-            Type relType = typeof(TR);
-
             EntityType type = (from meta in MetadataWorkspace.GetItems(DataSpace.CSpace)
                                where meta.BuiltInTypeKind == BuiltInTypeKind.EntityType
                                select meta)
-                              .OfType<EntityType>()
-                              .Where(e => e.Name == relType.Name).Single();
+                .OfType<EntityType>().Single(e => e.Name == parentEntityType.Name);
 
             //foreach (IRelatedEnd relatedEnd in ((IEntityWithRelationships)entityType).RelationshipManager.GetAllRelatedEnds())
             //{
@@ -165,31 +139,13 @@ namespace DoddleAudit.EntityFramework
             //}
 
 
-            //var navigationProperty = type.NavigationProperties.First(n => n.DeclaringType.Name == relType.Name);
+            //var navigationProperty = type.NavigationProperties.First(n => n.DeclaringType.Name == parentEntityType.Name);
             //return navigationProperty.ToEndMember.Name;
 
-            throw new InvalidOperationException(string.Format("Auditing associations with Entity Framework is currently unable to automatically lookup primary and foreign keys when using this overload of AuditAssocitation(). Please use the 'AuditAssocitation<{0}>(o => o.PrimaryKey, o => o.ForeignKey)' overload to manually provide the primary and foreign keys", relType));
+            throw new InvalidOperationException(string.Format("Auditing associations with Entity Framework is currently unable to automatically lookup primary and foreign keys when using this overload of AuditAssocitation(). Please use the 'AuditAssocitation<{0}>(o => o.PrimaryKey, o => o.ForeignKey)' overload to manually provide the primary and foreign keys", parentEntityType));
         }
 
-        public EmptyPropertyMode EmptyPropertyMode { get; set; }
-
-
-        public IList<Func<MemberInfo, object, bool>> PropertyAuditRules
-        {
-            get { return _propertyAuditRules; }
-        }
-
-        private IDictionary<Type, IAuditPropertyResolver> _resolvers = new Dictionary<Type, IAuditPropertyResolver>();
-
-        public IDictionary<Type, IAuditPropertyResolver> Resolvers
-        {
-            get { return _resolvers; }
-        }
-
-        public bool AuditingEnabled { get; set; }
-
-
-        public Type GetEntityType(Type entityType)
+        Type IAuditableContext.GetEntityType(Type entityType)
         {
             return entityType;
         }

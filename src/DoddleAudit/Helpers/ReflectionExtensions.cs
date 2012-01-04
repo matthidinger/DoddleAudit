@@ -2,18 +2,18 @@
 using System.Reflection;
 using System.Linq.Expressions;
 
-namespace DoddleAudit.Helpers
+namespace DoddleAudit
 {
     public static class ReflectionExtensions
     {
         public static bool HasAttribute(this Type t, Type attrType)
         {
-            return t.GetCustomAttributes(attrType, true) != null;
+            return t.GetCustomAttributes(attrType, true).Length > 0;
         }
 
         public static bool HasAttribute(this MemberInfo mi, Type attrType)
         {
-            return mi.GetCustomAttributes(attrType, false) != null;
+            return mi.GetCustomAttributes(attrType, false).Length > 0;
         }
 
         public static bool IsNullable(this Type theType)
@@ -25,7 +25,7 @@ namespace DoddleAudit.Helpers
         {
             MemberExpression memberExpression;
 
-            UnaryExpression unaryExpression = expression.Body as UnaryExpression;
+            var unaryExpression = expression.Body as UnaryExpression;
             if(unaryExpression != null)
             {
                memberExpression = unaryExpression.Operand as MemberExpression;

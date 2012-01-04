@@ -1,9 +1,7 @@
 using System;
-using System.Diagnostics;
 
 namespace DoddleAudit
 {
-    [DebuggerDisplay("{Key}")]
     public class EntityKey
     {
         public EntityKey(object key)
@@ -14,6 +12,11 @@ namespace DoddleAudit
 
         public object Key { get; private set; }
         public Type KeyType { get; private set; }
+
+        public override string ToString()
+        {
+            return Key != null ? Key.ToString() : "Unknown";
+        }
 
         public static implicit operator int(EntityKey key)
         {

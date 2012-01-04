@@ -12,15 +12,11 @@ namespace DoddleAudit.LinqToSql
         /// </summary>
         /// <example>db.Products.Audit();</example>
         /// <typeparam name="TEntity">Type of Entity you wish to audit</typeparam>
-        public static AuditDefinition<TEntity> Audit<TEntity>(this Table<TEntity> table) where TEntity : class
+        public static EntityAuditor<TEntity> Audit<TEntity>(this Table<TEntity> table) where TEntity : class
         {
-            IAuditableContext context = (IAuditableContext)table.Context;
-
-            AuditDefinition<TEntity> def = new AuditDefinition<TEntity>(context);
-            def.PkSelector = AuditExtensions.GetEntityPkProperty<TEntity>(context);
-
-            context.AuditDefinitions.Add(def);
-
+            var context = (IAuditableContext)table.Context;
+            var def = new EntityAuditor<TEntity>(context.GetEntityPkProperty<TEntity>().ToPropertyInfo());
+            context.EntityAuditors.Add(def);
             return def;
         }
 
@@ -30,15 +26,11 @@ namespace DoddleAudit.LinqToSql
         /// </summary>
         /// <example>db.Products.Audit(p => p.ProductID);</example>
         /// <typeparam name="TEntity">Type of Entity you wish to audit</typeparam>
-        public static AuditDefinition<TEntity> Audit<TEntity>(this Table<TEntity> table, Expression<Func<TEntity, object>> pkSelector) where TEntity : class
+        public static EntityAuditor<TEntity> Audit<TEntity>(this Table<TEntity> table, Expression<Func<TEntity, object>> pkSelector) where TEntity : class
         {
-            IAuditableContext context = (IAuditableContext)table.Context;
-
-            AuditDefinition<TEntity> def = new AuditDefinition<TEntity>(context);
-            def.PkSelector = pkSelector;
-
-            context.AuditDefinitions.Add(def);
-
+            var context = (IAuditableContext)table.Context;
+            var def = new EntityAuditor<TEntity>(pkSelector.ToPropertyInfo());
+            context.EntityAuditors.Add(def);
             return def;
         }
     }
