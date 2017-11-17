@@ -21,7 +21,7 @@ dataContext.Orders.Audit().AuditAssociation(o => o.Order_Details);
 dataContext.Contacts.Audit().AuditAssociation(c => c.Addresses).AuditAssociation(c => c.PhoneNumbers);
 ```
 
-For full usage declarations please see: [Define Audits](Define-Audits.md)
+For full usage declarations please see: [Define Audits](docs/Define-Audits.md)
 
 ### Limitations
 * **Any tables you want to audit must have one (and only one) Primary Key field, which is of type `int`**
